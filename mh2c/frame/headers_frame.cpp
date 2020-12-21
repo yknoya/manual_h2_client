@@ -49,13 +49,6 @@
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
 
-/*
- * [Notice]
- *   The following features have't been supported yet.
- *   - incremental indexing
- *   - huffman encode/decode
- */
-
 namespace mh2c {
 
 /*

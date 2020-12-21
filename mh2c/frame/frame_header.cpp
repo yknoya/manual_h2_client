@@ -59,8 +59,8 @@ byte_array_t serialize(const frame_header& fh) {
   // Serialize flags.
   serialized_fh.push_back(fh.m_flags);
 
-  // Convert byte order of reserved and length. Notice that reserved is actually 1
-  // bit.
+  // Convert byte order of reserved and length.
+  // Notice that reserved is actually 1 bit.
   const uint32_t reserved_and_stream_id = cvt_host2net(
       (extract_low_bit<RESERVED_BITS>(fh.m_reserved) << STREAM_ID_BITS) |
       fh.m_stream_id);

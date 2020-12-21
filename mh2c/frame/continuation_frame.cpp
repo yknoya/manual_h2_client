@@ -43,13 +43,6 @@
 #include "mh2c/hpack/header_encoder.h"
 #include "mh2c/hpack/header_type.h"
 
-/*
- * [Notice]
- *   The following features have't been supported yet.
- *   - incremental indexing
- *   - huffman encode/decode
- */
-
 namespace mh2c {
 
 /*
