@@ -31,6 +31,7 @@
  */
 #include "mh2c/http2_client.h"
 
+#include <algorithm>
 #include <cstdint>
 #include <ostream>
 #include <queue>

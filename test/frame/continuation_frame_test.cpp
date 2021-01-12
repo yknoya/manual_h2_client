@@ -40,9 +40,9 @@
 TEST(continuation_frame_test, serialize_indexed_header) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{
-      mh2c::make_header_block(mh2c::header_prefix_pattern::INDEXED,
-                              {"accept-encoding", "gzip, deflate"})};
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
+      mh2c::header_prefix_pattern::INDEXED,
+      mh2c::header_t{"accept-encoding", "gzip, deflate"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -64,9 +64,9 @@ TEST(continuation_frame_test, serialize_indexed_header_with_end_headers) {
   const mh2c::fh_flags_t flags{
       static_cast<mh2c::fh_flags_t>(mh2c::cf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{
-      mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
-                              {"accept-encoding", "gzip, deflate"})};
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
+      mh2c::header_prefix_pattern::NEVER_INDEXED,
+      mh2c::header_t{"accept-encoding", "gzip, deflate"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -87,9 +87,9 @@ TEST(continuation_frame_test, serialize_indexed_header_with_end_headers) {
 TEST(continuation_frame_test, serialize_indexed_header_name) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
       mh2c::header_prefix_pattern::NEVER_INDEXED,
-      {"if-modified-since", "Fri, 28 Aug 2020 10:00:00 GMT"})};
+      mh2c::header_t{"if-modified-since", "Fri, 28 Aug 2020 10:00:00 GMT"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -119,8 +119,8 @@ TEST(continuation_frame_test, serialize_indexed_header_name) {
 TEST(continuation_frame_test, serialize_indexed_header_name_empty_value) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::NEVER_INDEXED, {"age", ""})};
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
+      mh2c::header_prefix_pattern::NEVER_INDEXED, mh2c::header_t{"age", ""}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -142,8 +142,9 @@ TEST(continuation_frame_test, serialize_indexed_header_name_empty_value) {
 TEST(continuation_frame_test, serialize_literal_header) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::NEVER_INDEXED, {"hoge", "fuga"})};
+  const mh2c::header_block_t header_block(
+      mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
+                              mh2c::header_t{"hoge", "fuga"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -168,8 +169,9 @@ TEST(continuation_frame_test, serialize_literal_header) {
 TEST(continuation_frame_test, serialize_literal_header_same_value) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::NEVER_INDEXED, {":status-dummy", "200"})};
+  const mh2c::header_block_t header_block(
+      mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
+                              mh2c::header_t{":status-dummy", "200"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -197,8 +199,9 @@ TEST(continuation_frame_test, serialize_literal_header_same_value) {
 TEST(continuation_frame_test, serialize_literal_header_incremental_indexing) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::INCREMENTAL_INDEXING, {"hoge", "fuga"})};
+  const mh2c::header_block_t header_block(
+      mh2c::make_header_block(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
+                              mh2c::header_t{"hoge", "fuga"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -223,8 +226,9 @@ TEST(continuation_frame_test, serialize_literal_header_incremental_indexing) {
 TEST(continuation_frame_test, serialize_literal_header_without_indexing) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::WITHOUT_INDEXING, {"hoge", "fuga"})};
+  const mh2c::header_block_t header_block(
+      mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+                              mh2c::header_t{"hoge", "fuga"}));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -249,8 +253,8 @@ TEST(continuation_frame_test, serialize_literal_header_without_indexing) {
 TEST(continuation_frame_test, serialize_size_update) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{
-      {mh2c::header_prefix_pattern::SIZE_UPDATE, 1024u}};
+  const mh2c::header_block_t header_block(
+      {{mh2c::header_prefix_pattern::SIZE_UPDATE, 1024u}});
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -273,8 +277,9 @@ TEST(continuation_frame_test, serialize_size_update) {
 TEST(continuation_frame_test, serialize_literal_header_with_huffman_code) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::INCREMENTAL_INDEXING, {"hoge", "fuga"})};
+  const mh2c::header_block_t header_block(
+      mh2c::make_header_block(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
+                              mh2c::header_t{"hoge", "fuga"}));
   const auto mode = mh2c::header_encode_mode::HUFFMAN;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -300,12 +305,12 @@ TEST(continuation_frame_test, multi_headers) {
   const mh2c::fh_flags_t flags{
       static_cast<mh2c::fh_flags_t>(mh2c::cf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
       mh2c::header_prefix_pattern::NEVER_INDEXED,
       mh2c::headers_t{
           {"accept-encoding", "gzip, deflate"},
           {"if-modified-since", "Fri, 28 Aug 2020 10:00:00 GMT"},
-      })};
+      }));
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table dynamic_table{};
   const mh2c::continuation_frame cf(flags, stream_id, header_block, mode,
@@ -337,8 +342,8 @@ TEST(continuation_frame_test, serialize_indexed_header_in_dynamic_table) {
   const mh2c::fh_flags_t flags{0u};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_t target_header{"hoge", "fuga"};
-  const mh2c::header_block_t header_block{mh2c::make_header_block(
-      mh2c::header_prefix_pattern::WITHOUT_INDEXING, target_header)};
+  const mh2c::header_block_t header_block(mh2c::make_header_block(
+      mh2c::header_prefix_pattern::WITHOUT_INDEXING, target_header));
   const auto mode = mh2c::header_encode_mode::NONE;
   mh2c::dynamic_table dynamic_table{};
   dynamic_table.push(target_header);

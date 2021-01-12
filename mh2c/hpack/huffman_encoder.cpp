@@ -68,7 +68,7 @@ byte_array_t encode(const byte_array_t& raw_data) {
 
   const auto encode_func = [&carry_over_record, &encoded_data](const auto data) {
     auto encode_table_record = encode_table.at(data);
-    const auto total_bit_size =
+    const encode_table_value::second_type total_bit_size =
         carry_over_record.second + encode_table_record.second;
     if (total_bit_size < FILL_BIT_SIZE) {
       fill_record(&carry_over_record, &encode_table_record);
