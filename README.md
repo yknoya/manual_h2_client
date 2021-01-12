@@ -4,7 +4,7 @@ The purpose of the library is to debug a HTTP/2 server.
 
 ## Requirement
 * C++17 or later
-* [CMake](https://cmake.org/download/) 3.16 or later
+* [CMake](https://cmake.org/download/) 3.13 or later
 * [OpenSSL](https://www.openssl.org/source/) 1.1.1g or later
 * [GoogleTest](https://github.com/google/googletest) 1.10 or later (optional)
 * [clang-format](https://clang.llvm.org/docs/ClangFormat.html) 10.0.1 or later (optional)
