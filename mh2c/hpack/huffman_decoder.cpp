@@ -83,7 +83,8 @@ byte_array_t decode(const byte_array_t& encoded_data) {
       size_t erase_length{};
       if (carry_over.second < bit_length) {
         const auto required_bit = bit_length - carry_over.second;
-        const auto required_byte = required_bit / 8 + 1;
+        const auto required_byte =
+            required_bit % 8 == 0 ? required_bit / 8 : required_bit / 8 + 1;
         auto target = construct_integer(temp_encoded_data, required_byte);
         const auto shift_bit =
             (required_byte * 8 + carry_over.second) - bit_length;
