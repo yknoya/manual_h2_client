@@ -28,8 +28,10 @@ struct push_promise_payload {
   byte_array_t m_padding;
 };
 
-bool operator==(const push_promise_payload& lhs, const push_promise_payload& rhs);
-bool operator!=(const push_promise_payload& lhs, const push_promise_payload& rhs);
+bool operator==(const push_promise_payload& lhs,
+                const push_promise_payload& rhs);
+bool operator!=(const push_promise_payload& lhs,
+                const push_promise_payload& rhs);
 
 class push_promise_frame : public i_frame<frame_header> {
  public:
@@ -55,7 +57,8 @@ class push_promise_frame : public i_frame<frame_header> {
                          const push_promise_frame& rhs);
 };
 
-std::ostream& operator<<(std::ostream& out_stream, const push_promise_frame& hf);
+std::ostream& operator<<(std::ostream& out_stream,
+                         const push_promise_frame& hf);
 bool operator==(const push_promise_frame& lhs, const push_promise_frame& rhs);
 bool operator!=(const push_promise_frame& lhs, const push_promise_frame& rhs);
 

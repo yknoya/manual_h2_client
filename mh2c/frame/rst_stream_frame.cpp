@@ -74,13 +74,15 @@ void rst_stream_frame::dump(std::ostream& out_stream) const {
                << '\n';
   } else {
     out_stream << "  Error Code: "
-               << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR) << "("
-               << std::to_string(static_cast<uint32_t>(m_error_code)) << ")\n";
+               << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR)
+               << "(" << std::to_string(static_cast<uint32_t>(m_error_code))
+               << ")\n";
   }
   return;
 }
 
-std::ostream& operator<<(std::ostream& out_stream, const rst_stream_frame& rsf) {
+std::ostream& operator<<(std::ostream& out_stream,
+                         const rst_stream_frame& rsf) {
   rsf.dump(out_stream);
   return out_stream;
 }

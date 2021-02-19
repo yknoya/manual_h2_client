@@ -113,7 +113,8 @@ decoded_payload_t decode_payload(const frame_header& fh,
     // Exclusive and Stream Dependency
     byte_array_t raw_stream_dependency{};
     const auto begin_stream_dependency = raw_data.begin();
-    const auto end_stream_dependency = raw_data.begin() + sizeof(fh_stream_id_t);
+    const auto end_stream_dependency =
+        raw_data.begin() + sizeof(fh_stream_id_t);
     std::copy(begin_stream_dependency, end_stream_dependency,
               std::back_inserter(raw_stream_dependency));
 

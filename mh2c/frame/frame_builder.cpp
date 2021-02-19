@@ -116,7 +116,8 @@ h2_frame_ptr build_window_update_frame(const frame_header& fh,
   return std::make_unique<window_update_frame>(fh, raw_payload);
 }
 
-using builder_func_t = h2_frame_ptr (*)(const frame_header&, const byte_array_t&,
+using builder_func_t = h2_frame_ptr (*)(const frame_header&,
+                                        const byte_array_t&,
                                         const dynamic_table&);
 
 const std::unordered_map<frame_type_registry, builder_func_t> builder_func_map{

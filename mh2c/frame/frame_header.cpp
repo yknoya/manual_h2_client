@@ -23,7 +23,8 @@ byte_array_t serialize(const frame_header& fh) {
 
   // Serialize length. Notice that length is actually 24 bit.
   auto begin = reinterpret_cast<const uint8_t*>(&length);
-  std::copy(begin + 1, begin + sizeof(length), std::back_inserter(serialized_fh));
+  std::copy(begin + 1, begin + sizeof(length),
+            std::back_inserter(serialized_fh));
 
   // Serialize type.
   serialized_fh.push_back(fh.m_type);
@@ -46,8 +47,8 @@ byte_array_t serialize(const frame_header& fh) {
 }
 
 frame_header build_frame_header(const byte_array_t& raw_fh) {
-  const fh_length_t length =
-      extract_high_bit<LENGTH_BITS>(bytes2integral<fh_length_t>(raw_fh.begin()));
+  const fh_length_t length = extract_high_bit<LENGTH_BITS>(
+      bytes2integral<fh_length_t>(raw_fh.begin()));
   const fh_type_t type = raw_fh[3];
   const fh_flags_t flags = raw_fh[4];
   const fh_stream_id_t reserved_and_stream_id =
@@ -66,7 +67,8 @@ std::ostream& operator<<(std::ostream& out_stream, const frame_header& fh) {
                     << "  type      : " << std::to_string(fh.m_type) << '\n'
                     << "  flags     : " << std::to_string(fh.m_flags) << '\n'
                     << "  reserved  : " << std::to_string(fh.m_reserved) << '\n'
-                    << "  stream id : " << std::to_string(fh.m_stream_id) << '\n';
+                    << "  stream id : " << std::to_string(fh.m_stream_id)
+                    << '\n';
 }
 
 bool operator==(const frame_header& lhs, const frame_header& rhs) {

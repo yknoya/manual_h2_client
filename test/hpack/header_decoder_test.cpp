@@ -97,7 +97,8 @@ TEST(header_decoder, new_name_WITHOUT_INDEXING) {
 // cf. https://tools.ietf.org/html/rfc7541#section-6.2.3
 TEST(header_decoder, indexed_name_NEVER_INDEXED) {
   const mh2c::header_block_entry expected_header_entry{
-      mh2c::header_prefix_pattern::NEVER_INDEXED, {":authority", "example.com"}};
+      mh2c::header_prefix_pattern::NEVER_INDEXED,
+      {":authority", "example.com"}};
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table request_dynamic_table{};
   const auto encoded_header =

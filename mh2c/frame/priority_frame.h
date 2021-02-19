@@ -25,7 +25,8 @@ bool operator!=(const priority_payload& lhs, const priority_payload& rhs);
 
 class priority_frame : public i_frame<frame_header> {
  public:
-  priority_frame(const fh_stream_id_t stream_id, const priority_payload& payload);
+  priority_frame(const fh_stream_id_t stream_id,
+                 const priority_payload& payload);
   priority_frame(const frame_header& fh, const byte_array_t& raw_payload);
 
   frame_header get_header() const override;

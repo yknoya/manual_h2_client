@@ -46,8 +46,9 @@ goaway_payload construct_payload(const byte_array_t& raw_payload) {
       extract_low_bit<STREAM_ID_BITS>(r_and_last_stream_id);
 
   // Error Code
-  const auto raw_error_code = bytes2integral<std::underlying_type_t<error_codes>>(
-      raw_payload.begin() + sizeof(r_and_last_stream_id));
+  const auto raw_error_code =
+      bytes2integral<std::underlying_type_t<error_codes>>(
+          raw_payload.begin() + sizeof(r_and_last_stream_id));
   const auto error_code = static_cast<error_codes>(raw_error_code);
 
   // Additional Debug Data
@@ -100,7 +101,8 @@ byte_array_t goaway_frame::serialize() const {
   const auto error_code =
       cvt_host2net(static_cast<uint32_t>(m_payload.m_error_code));
   begin = reinterpret_cast<const uint8_t*>(&error_code);
-  std::copy(begin, begin + sizeof(error_codes), std::back_inserter(serialzed_gf));
+  std::copy(begin, begin + sizeof(error_codes),
+            std::back_inserter(serialzed_gf));
 
   // Serialize Additional Debug Data
   if (m_payload.m_additional_debug_data.size() > 0) {
@@ -117,15 +119,17 @@ void goaway_frame::dump(std::ostream& out_stream) const {
   out_stream << m_header;
   out_stream << "[PAYLOAD]\n";
   out_stream << "  R: " << std::to_string(m_payload.m_reserved) << '\n';
-  out_stream << "  Last-Stream-ID: " << std::to_string(m_payload.m_last_stream_id)
-             << '\n';
+  out_stream << "  Last-Stream-ID: "
+             << std::to_string(m_payload.m_last_stream_id) << '\n';
   const auto error_code = m_payload.m_error_code;
   if (error_code < mh2c::error_codes::UNKNOWN_ERROR) {
-    out_stream << "  Error Code: " << error_codes_str_map.at(error_code) << '\n';
+    out_stream << "  Error Code: " << error_codes_str_map.at(error_code)
+               << '\n';
   } else {
     out_stream << "  Error Code: "
-               << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR) << "("
-               << std::to_string(static_cast<uint32_t>(error_code)) << ")\n";
+               << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR)
+               << "(" << std::to_string(static_cast<uint32_t>(error_code))
+               << ")\n";
   }
   out_stream << "  Additional Debug Data: ";
   if (m_payload.m_additional_debug_data.empty() == false) {

@@ -50,8 +50,8 @@ TEST(frame_builder_test, continuation_frame_no_flags) {
       })};
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table request_dynamic_table{};
-  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block, mode,
-                                             request_dynamic_table};
+  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block,
+                                             mode, request_dynamic_table};
 
   mh2c::byte_array_t raw_payload = extract_payload(expected_cf);
   mh2c::dynamic_table response_dynamic_table{};
@@ -73,8 +73,8 @@ TEST(frame_builder_test, continuation_frame_with_end_headers) {
       })};
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table request_dynamic_table{};
-  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block, mode,
-                                             request_dynamic_table};
+  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block,
+                                             mode, request_dynamic_table};
 
   mh2c::byte_array_t raw_payload = extract_payload(expected_cf);
   mh2c::dynamic_table dynamic_table{};
@@ -96,8 +96,8 @@ TEST(frame_builder_test, continuation_frame_never_indexed) {
       })};
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table request_dynamic_table{};
-  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block, mode,
-                                             request_dynamic_table};
+  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block,
+                                             mode, request_dynamic_table};
 
   mh2c::byte_array_t raw_payload = extract_payload(expected_cf);
   mh2c::dynamic_table dynamic_table{};
@@ -119,8 +119,8 @@ TEST(frame_builder_test, continuation_frame_incremental_indexing) {
       })};
   const auto mode = mh2c::header_encode_mode::NONE;
   const mh2c::dynamic_table request_dynamic_table{};
-  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block, mode,
-                                             request_dynamic_table};
+  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block,
+                                             mode, request_dynamic_table};
 
   mh2c::byte_array_t raw_payload = extract_payload(expected_cf);
   mh2c::dynamic_table dynamic_table{};
@@ -498,7 +498,8 @@ TEST(frame_builder_test, push_promise_frame_no_flags) {
   const auto frame =
       mh2c::build_frame(expected_ppf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_ppf, *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
+  EXPECT_EQ(expected_ppf,
+            *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
 }
 
 TEST(frame_builder_test, push_promise_frame_with_end_headers) {
@@ -523,7 +524,8 @@ TEST(frame_builder_test, push_promise_frame_with_end_headers) {
   const auto frame =
       mh2c::build_frame(expected_ppf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_ppf, *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
+  EXPECT_EQ(expected_ppf,
+            *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
 }
 
 TEST(frame_builder_test, push_promise_frame_never_indexed) {
@@ -548,7 +550,8 @@ TEST(frame_builder_test, push_promise_frame_never_indexed) {
   const auto frame =
       mh2c::build_frame(expected_ppf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_ppf, *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
+  EXPECT_EQ(expected_ppf,
+            *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
 }
 
 TEST(frame_builder_test, push_promise_frame_incremental_indexing) {
@@ -573,7 +576,8 @@ TEST(frame_builder_test, push_promise_frame_incremental_indexing) {
   const auto frame =
       mh2c::build_frame(expected_ppf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_ppf, *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
+  EXPECT_EQ(expected_ppf,
+            *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
 }
 
 TEST(frame_builder_test, push_promise_frame_with_padding) {
@@ -599,7 +603,8 @@ TEST(frame_builder_test, push_promise_frame_with_padding) {
   const auto frame =
       mh2c::build_frame(expected_ppf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_ppf, *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
+  EXPECT_EQ(expected_ppf,
+            *dynamic_cast<mh2c::push_promise_frame*>(frame.get()));
 }
 
 // Build RST_STREAM FRAME
@@ -647,8 +652,8 @@ TEST(frame_builder_test, settings_frame_full_settings) {
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE,
                               512u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM,
-                              16u),
+      mh2c::make_sf_parameter(
+          mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM, 16u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE,
                               65535u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_FRAME_SIZE,
@@ -666,7 +671,8 @@ TEST(frame_builder_test, settings_frame_full_settings) {
 }
 
 TEST(frame_builder_test, settings_frame_ack) {
-  const mh2c::fh_flags_t flags{static_cast<mh2c::fh_flags_t>(mh2c::sf_flag::ACK)};
+  const mh2c::fh_flags_t flags{
+      static_cast<mh2c::fh_flags_t>(mh2c::sf_flag::ACK)};
   const mh2c::fh_stream_id_t stream_id{0u};
   const mh2c::sf_payload_t sf_payload{};
   const mh2c::settings_frame expected_sf{flags, stream_id, sf_payload};
@@ -690,19 +696,22 @@ TEST(frame_builder_test, window_update_frame) {
   const auto frame =
       mh2c::build_frame(expected_wuf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_wuf, *dynamic_cast<mh2c::window_update_frame*>(frame.get()));
+  EXPECT_EQ(expected_wuf,
+            *dynamic_cast<mh2c::window_update_frame*>(frame.get()));
 }
 
 TEST(frame_builder_test, window_update_with_reserved) {
   const mh2c::fh_stream_id_t stream_id{0u};
   const mh2c::reserved_t reserved{1u};
   const mh2c::window_size_t window_size{0x01234567};
-  const mh2c::window_update_frame expected_wuf{stream_id, reserved, window_size};
+  const mh2c::window_update_frame expected_wuf{stream_id, reserved,
+                                               window_size};
 
   mh2c::byte_array_t raw_payload = extract_payload(expected_wuf);
   mh2c::dynamic_table dynamic_table{};
   const auto frame =
       mh2c::build_frame(expected_wuf.get_header(), raw_payload, dynamic_table);
 
-  EXPECT_EQ(expected_wuf, *dynamic_cast<mh2c::window_update_frame*>(frame.get()));
+  EXPECT_EQ(expected_wuf,
+            *dynamic_cast<mh2c::window_update_frame*>(frame.get()));
 }

@@ -38,7 +38,8 @@ byte_array_t encode(const byte_array_t& raw_data) {
   encode_table_value carry_over_record{};
   byte_array_t encoded_data{};
 
-  const auto encode_func = [&carry_over_record, &encoded_data](const auto data) {
+  const auto encode_func = [&carry_over_record,
+                            &encoded_data](const auto data) {
     auto encode_table_record = encode_table.at(data);
     const encode_table_value::second_type total_bit_size =
         carry_over_record.second + encode_table_record.second;
@@ -67,7 +68,8 @@ byte_array_t encode(const byte_array_t& raw_data) {
     // cf. https://tools.ietf.org/html/rfc7540#section-6.5.1
     const auto eos_record = encode_table.at(encode_table.size() - 1);
     const auto pad_bit_size = FILL_BIT_SIZE - carry_over_record.second;
-    const auto pad_bits = eos_record.first >> (eos_record.second - pad_bit_size);
+    const auto pad_bits =
+        eos_record.first >> (eos_record.second - pad_bit_size);
 
     const auto last_byte = (carry_over_record.first << pad_bit_size) | pad_bits;
     encoded_data.push_back(static_cast<byte_array_t::value_type>(last_byte));

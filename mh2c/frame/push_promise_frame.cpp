@@ -39,7 +39,8 @@ byte_array_t construct_encoded_payload(const fh_flags_t flags,
   // Reserved and Promised Stream ID
   const decltype(payload.m_promised_stream_id) r_promised_stream_id =
       cvt_host2net(
-          (extract_low_bit<RESERVED_BITS>(payload.m_reserved) << STREAM_ID_BITS) |
+          (extract_low_bit<RESERVED_BITS>(payload.m_reserved)
+           << STREAM_ID_BITS) |
           extract_low_bit<STREAM_ID_BITS>(payload.m_promised_stream_id));
   const auto begin = reinterpret_cast<const uint8_t*>(&r_promised_stream_id);
   std::copy(begin, begin + sizeof(r_promised_stream_id),
@@ -140,7 +141,9 @@ push_promise_frame::push_promise_frame(const frame_header& fh,
 
 frame_header push_promise_frame::get_header() const { return m_header; }
 
-push_promise_payload push_promise_frame::get_payload() const { return m_payload; }
+push_promise_payload push_promise_frame::get_payload() const {
+  return m_payload;
+}
 
 byte_array_t push_promise_frame::serialize() const {
   byte_array_t serialized_hf = mh2c::serialize(m_header);
@@ -190,7 +193,8 @@ void push_promise_frame::dump(std::ostream& out_stream) const {
   return;
 }
 
-std::ostream& operator<<(std::ostream& out_stream, const push_promise_frame& hf) {
+std::ostream& operator<<(std::ostream& out_stream,
+                         const push_promise_frame& hf) {
   hf.dump(out_stream);
   return out_stream;
 }

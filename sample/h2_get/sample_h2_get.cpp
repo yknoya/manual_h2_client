@@ -11,7 +11,8 @@ bool is_more_data(const mh2c::frame_header& fh) {
   auto result = true;
   switch (fh.m_type) {
     case static_cast<mh2c::fh_type_t>(mh2c::frame_type_registry::DATA):
-      if (fh.m_flags & static_cast<mh2c::fh_flags_t>(mh2c::df_flag::END_STREAM)) {
+      if (fh.m_flags &
+          static_cast<mh2c::fh_flags_t>(mh2c::df_flag::END_STREAM)) {
         result = false;
       }
       break;

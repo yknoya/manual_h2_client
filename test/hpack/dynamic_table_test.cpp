@@ -30,14 +30,15 @@ TEST(dynamic_table, push_single_header) {
   EXPECT_EQ(authority_header, table.at(0));
   EXPECT_EQ(expected_entries, table.get_entries());
   EXPECT_EQ(expected_table_size, table.get_table_size());
-  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE, table.get_max_table_size());
+  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE,
+            table.get_max_table_size());
 }
 
 TEST(dynamic_table, push_multiple_header) {
   const mh2c::header_t authority_header{":authority", "example.com"};
   const mh2c::header_t content_type_header{"content-type", "application/json"};
-  const mh2c::dynamic_table::container_type expected_entries{content_type_header,
-                                                             authority_header};
+  const mh2c::dynamic_table::container_type expected_entries{
+      content_type_header, authority_header};
   const auto expected_table_size{calculate_header_size(authority_header) +
                                  calculate_header_size(content_type_header)};
 
@@ -49,7 +50,8 @@ TEST(dynamic_table, push_multiple_header) {
   EXPECT_EQ(authority_header, table.at(1));
   EXPECT_EQ(expected_entries, table.get_entries());
   EXPECT_EQ(expected_table_size, table.get_table_size());
-  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE, table.get_max_table_size());
+  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE,
+            table.get_max_table_size());
 }
 
 TEST(dynamic_table, resize_table) {
@@ -80,7 +82,8 @@ TEST(dynamic_table, update_table_size) {
 
   EXPECT_EQ(entries, table.get_entries());
   EXPECT_EQ(table_size, table.get_table_size());
-  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE, table.get_max_table_size());
+  EXPECT_EQ(mh2c::dynamic_table::DEFAULT_TABLE_SIZE,
+            table.get_max_table_size());
 
   const mh2c::dynamic_table::container_type updated_entries{entries[0]};
   const auto updated_table_size{calculate_header_size(content_type_header)};

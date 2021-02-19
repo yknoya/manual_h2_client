@@ -45,7 +45,8 @@ using header_table_t = std::map<header_index_t, header_t>;
 class header_block_entry {
  public:
   explicit header_block_entry(const header_t& header);
-  header_block_entry(const header_prefix_pattern prefix, const header_t& header);
+  header_block_entry(const header_prefix_pattern prefix,
+                     const header_t& header);
   header_block_entry(const header_prefix_pattern prefix, const size_t max_size);
 
   header_prefix_pattern get_prefix() const;

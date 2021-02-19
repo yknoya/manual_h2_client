@@ -29,16 +29,17 @@ namespace {
 
 void update_dynamic_table(const header_block_t& header_block,
                           dynamic_table* dynamic_table) {
-  std::for_each(header_block.begin(), header_block.end(),
-                [dynamic_table](const auto& header_entry) {
-                  if (header_entry.get_prefix() ==
-                      header_prefix_pattern::INCREMENTAL_INDEXING) {
-                    dynamic_table->push(header_entry.get_header());
-                  } else if (header_entry.get_prefix() ==
-                             header_prefix_pattern::SIZE_UPDATE) {
-                    dynamic_table->update_table_size(header_entry.get_max_size());
-                  }
-                });
+  std::for_each(
+      header_block.begin(), header_block.end(),
+      [dynamic_table](const auto& header_entry) {
+        if (header_entry.get_prefix() ==
+            header_prefix_pattern::INCREMENTAL_INDEXING) {
+          dynamic_table->push(header_entry.get_header());
+        } else if (header_entry.get_prefix() ==
+                   header_prefix_pattern::SIZE_UPDATE) {
+          dynamic_table->update_table_size(header_entry.get_max_size());
+        }
+      });
 
   return;
 }
@@ -58,8 +59,8 @@ void update_dynamic_table(const h2_frame_ptr& frame_ptr,
                          .m_header_block;
       break;
     case frame_type_registry::CONTINUATION:
-      header_block =
-          dynamic_cast<const continuation_frame*>(frame_ptr.get())->get_payload();
+      header_block = dynamic_cast<const continuation_frame*>(frame_ptr.get())
+                         ->get_payload();
       break;
     case frame_type_registry::SETTINGS: {
       const auto sf_payload =
@@ -108,7 +109,8 @@ http2_client::impl::impl(const std::string& hostname, uint16_t port,
                          const ssl::verify_mode mode)
     : m_ssl_connection{hostname, port, mode} {}
 
-void http2_client::impl::send_raw_data(const uint8_t* data, const size_t length) {
+void http2_client::impl::send_raw_data(const uint8_t* data,
+                                       const size_t length) {
   m_ssl_connection.write(data, length);
   return;
 }

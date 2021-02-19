@@ -26,7 +26,8 @@ byte_array_t encode_integer_value(size_t value) {
   encoded_value.push_back(max_value);
   value -= max_value;
   while (value >= max_subsequent_value) {
-    encoded_value.push_back(value % max_subsequent_value + max_subsequent_value);
+    encoded_value.push_back(value % max_subsequent_value +
+                            max_subsequent_value);
     value /= max_subsequent_value;
   }
   encoded_value.push_back(value);

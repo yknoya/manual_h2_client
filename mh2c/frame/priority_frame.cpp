@@ -36,7 +36,8 @@ priority_payload construct_payload(const byte_array_t& raw_payload) {
     throw std::invalid_argument(msg);
   }
 
-  const uint8_t exclusive_flag = extract_high_bit<EXCLUSIVE_BITS>(raw_payload[0]);
+  const uint8_t exclusive_flag =
+      extract_high_bit<EXCLUSIVE_BITS>(raw_payload[0]);
   const auto stream_dependency = extract_low_bit<STREAM_ID_BITS>(
       bytes2integral<fh_stream_id_t>(raw_payload.begin()));
   const uint8_t weight = raw_payload[4];
@@ -46,7 +47,8 @@ priority_payload construct_payload(const byte_array_t& raw_payload) {
 
 void validate_payload(const priority_payload& payload) {
   if (payload.m_exclusive > 1u) {
-    const auto msg = "invalid exclusive: " + std::to_string(payload.m_exclusive);
+    const auto msg =
+        "invalid exclusive: " + std::to_string(payload.m_exclusive);
     throw std::invalid_argument(msg);
   }
 
@@ -96,7 +98,8 @@ byte_array_t priority_frame::serialize() const {
                     << STREAM_ID_BITS) |
                    m_payload.m_stream_dependency);
 
-  const auto begin = reinterpret_cast<uint8_t*>(&exclusive_and_stream_dependency);
+  const auto begin =
+      reinterpret_cast<uint8_t*>(&exclusive_and_stream_dependency);
   std::copy(begin, begin + sizeof(exclusive_and_stream_dependency),
             std::back_inserter(serialized_pf));
 

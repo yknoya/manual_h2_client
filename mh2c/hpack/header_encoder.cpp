@@ -58,7 +58,8 @@ byte_array_t encode_header_value(const header_value_t& header_value,
   byte_array_t encoded_header_value{};
 
   // Apply Huffman encode if needed
-  const byte_array_t header_value_bytes{header_value.begin(), header_value.end()};
+  const byte_array_t header_value_bytes{header_value.begin(),
+                                        header_value.end()};
   const auto encoded_bytes = (encode_mode == header_encode_mode::HUFFMAN)
                                  ? huffman::encode(header_value_bytes)
                                  : header_value_bytes;
@@ -93,9 +94,11 @@ byte_array_t encode_header_name(const header_name_t& header_name,
   // Emcpde header name length
   const auto flag_huffman_encode =
       static_cast<byte_array_t::value_type>(encode_mode);
-  auto encoded_header_name_length = encode_integer_value<7>(encoded_bytes.size());
+  auto encoded_header_name_length =
+      encode_integer_value<7>(encoded_bytes.size());
   encoded_header_name_length[0] |= flag_huffman_encode;
-  std::copy(encoded_header_name_length.begin(), encoded_header_name_length.end(),
+  std::copy(encoded_header_name_length.begin(),
+            encoded_header_name_length.end(),
             std::back_inserter(encoded_header_name));
 
   // Encode header value
@@ -120,7 +123,8 @@ byte_array_t encode_header(const header_block_entry& header_entry,
   // header name/value match in reverse static table
   // cf. https://tools.ietf.org/html/rfc7541#section-6.1
   const auto iter = reverse_static_table_entries.find(header);
-  if (iter != reverse_static_table_entries.end() && header.second.length() > 0) {
+  if (iter != reverse_static_table_entries.end() &&
+      header.second.length() > 0) {
     return encode_index(iter->second, header_prefix_pattern::INDEXED);
   }
 
@@ -138,7 +142,8 @@ byte_array_t encode_header(const header_block_entry& header_entry,
   //     https://tools.ietf.org/html/rfc7541#section-6.2.2
   //     https://tools.ietf.org/html/rfc7541#section-6.2.3
   header_t name_only_header{header.first, ""};
-  const auto iter_name_only = reverse_static_table_entries.find(name_only_header);
+  const auto iter_name_only =
+      reverse_static_table_entries.find(name_only_header);
   if (iter_name_only != reverse_static_table_entries.end()) {
     auto encoded_header = encode_index(iter_name_only->second, prefix);
     auto encoded_header_value = encode_header_value(header.second, encode_mode);

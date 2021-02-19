@@ -35,7 +35,8 @@ struct hf_priority_option {
 class headers_frame : public i_frame<frame_header> {
  public:
   headers_frame(const fh_flags_t flags, const fh_stream_id_t stream_id,
-                const header_block_t& header_block, const header_encode_mode mode,
+                const header_block_t& header_block,
+                const header_encode_mode mode,
                 const dynamic_table& dynamic_table,
                 const byte_array_t& padding = {},
                 const hf_priority_option& priority_option = {});

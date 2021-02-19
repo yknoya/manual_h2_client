@@ -14,8 +14,8 @@ TEST(settings_frame_test, serialize) {
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE,
                               512u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM,
-                              16u),
+      mh2c::make_sf_parameter(
+          mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM, 16u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE,
                               65535u),
       mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_FRAME_SIZE,

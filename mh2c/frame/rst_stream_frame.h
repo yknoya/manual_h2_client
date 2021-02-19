@@ -16,7 +16,8 @@ namespace mh2c {
 // cf. https://tools.ietf.org/html/rfc7540#section-6.4
 class rst_stream_frame : public i_frame<frame_header> {
  public:
-  rst_stream_frame(const fh_stream_id_t stream_id, const error_codes error_code);
+  rst_stream_frame(const fh_stream_id_t stream_id,
+                   const error_codes error_code);
   rst_stream_frame(const frame_header& fh, const byte_array_t& raw_payload);
 
   frame_header get_header() const override;

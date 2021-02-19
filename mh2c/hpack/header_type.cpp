@@ -15,7 +15,8 @@ namespace {
 header_block_entry correct_prefix(const header_block_entry& header_entry) {
   const auto header = header_entry.get_header();
   const auto iter = reverse_static_table_entries.find(header);
-  if (iter != reverse_static_table_entries.end() && header.second.length() > 0) {
+  if (iter != reverse_static_table_entries.end() &&
+      header.second.length() > 0) {
     return header_block_entry{header_prefix_pattern::INDEXED, header};
   }
 
@@ -35,7 +36,9 @@ header_block_entry::header_block_entry(const header_prefix_pattern prefix,
                                        const size_t max_size)
     : m_prefix{prefix}, m_entry{max_size} {}
 
-header_prefix_pattern header_block_entry::get_prefix() const { return m_prefix; }
+header_prefix_pattern header_block_entry::get_prefix() const {
+  return m_prefix;
+}
 
 header_t header_block_entry::get_header() const {
   if (std::holds_alternative<header_t>(m_entry)) {
@@ -56,7 +59,9 @@ std::variant<header_t, size_t> header_block_entry::get_entry() const {
   return m_entry;
 }
 
-void header_block_entry::set_header(const header_t& header) { m_entry = header; }
+void header_block_entry::set_header(const header_t& header) {
+  m_entry = header;
+}
 
 bool operator==(const header_block_entry& lhs, const header_block_entry& rhs) {
   return lhs.get_prefix() == rhs.get_prefix() &&
@@ -76,7 +81,8 @@ header_block_t make_header_block(const header_prefix_pattern prefix,
                                  const headers_t& headers) {
   header_block_t header_block{};
 
-  std::transform(headers.begin(), headers.end(), std::back_inserter(header_block),
+  std::transform(headers.begin(), headers.end(),
+                 std::back_inserter(header_block),
                  [prefix](const auto& header) {
                    return correct_prefix({prefix, header});
                  });

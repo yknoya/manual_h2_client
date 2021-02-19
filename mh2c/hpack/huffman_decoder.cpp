@@ -62,8 +62,9 @@ byte_array_t decode(const byte_array_t& encoded_data) {
             (required_byte * 8 + carry_over.second) - bit_length;
         const auto shifted_target = target >> shift_bit;
         const auto shifted_value = (target ^ (shifted_target << shift_bit));
-        decode_map_key = (carry_over.first << (bit_length - carry_over.second)) |
-                         shifted_target;
+        decode_map_key =
+            (carry_over.first << (bit_length - carry_over.second)) |
+            shifted_target;
         temp_carry_over = {shifted_value, shift_bit};
         erase_length = required_byte;
       } else {
@@ -91,7 +92,8 @@ byte_array_t decode(const byte_array_t& encoded_data) {
 
     if (found == false) {
       const auto msg =
-          "decode failed: carry_over.first=" + std::to_string(carry_over.first) +
+          "decode failed: carry_over.first=" +
+          std::to_string(carry_over.first) +
           ", carry_over.second=" + std::to_string(carry_over.second) +
           ", temp_encoded_data[0]=" + std::to_string(temp_encoded_data[0]) +
           ", temp_encoded_data[1]=" + std::to_string(temp_encoded_data[1]) +

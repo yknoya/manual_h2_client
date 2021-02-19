@@ -21,7 +21,8 @@ raw_frame::raw_frame(const frame_header& header, const byte_array_t& payload)
 
 byte_array_t raw_frame::serialize() const {
   byte_array_t serialzed_sf = mh2c::serialize(m_header);
-  std::copy(m_payload.begin(), m_payload.end(), std::back_inserter(serialzed_sf));
+  std::copy(m_payload.begin(), m_payload.end(),
+            std::back_inserter(serialzed_sf));
   return serialzed_sf;
 }
 

@@ -12,7 +12,8 @@
 
 namespace mh2c {
 
-h2_frame_ptr build_frame(const frame_header& fh, const byte_array_t& raw_payload,
+h2_frame_ptr build_frame(const frame_header& fh,
+                         const byte_array_t& raw_payload,
                          const dynamic_table& dynamic_table);
 
 }  // namespace mh2c

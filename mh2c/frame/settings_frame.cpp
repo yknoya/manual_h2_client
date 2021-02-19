@@ -28,7 +28,8 @@ const std::unordered_map<sf_parameter, std::string> sf_parameter_str_map{
     {sf_parameter::SETTINGS_ENABLE_PUSH, "SETTINGS_ENABLE_PUSH"},
     {sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM,
      "SETTINGS_MAX_CONCURRENT_STREAM"},
-    {sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE, "SETTINGS_INITIAL_WINDOW_SIZE"},
+    {sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE,
+     "SETTINGS_INITIAL_WINDOW_SIZE"},
     {sf_parameter::SETTINGS_MAX_FRAME_SIZE, "SETTINGS_MAX_FRAME_SIZE"},
     {sf_parameter::SETTINGS_MAX_HEADER_LIST_SIZE,
      "SETTINGS_MAX_HEADER_LIST_SIZE"},
@@ -40,8 +41,8 @@ frame_header construct_frame_header(fh_flags_t flags, fh_stream_id_t stream_id,
   const fh_length_t length =
       (sizeof(sf_id_t) + sizeof(sf_value_t)) * payload.size();
 
-  return {length, static_cast<fh_type_t>(frame_type_registry::SETTINGS), flags, 0,
-          stream_id};
+  return {length, static_cast<fh_type_t>(frame_type_registry::SETTINGS), flags,
+          0, stream_id};
 }
 
 }  // namespace
@@ -89,8 +90,8 @@ void settings_frame::dump(std::ostream& out_stream) const {
         setting_pair.first >=
             static_cast<sf_id_t>(sf_parameter::SETTINGS_UNKNOWN)) {
       out_stream << "  "
-                 << sf_parameter_str_map.at(sf_parameter::SETTINGS_UNKNOWN) << '('
-                 << std::to_string(setting_pair.first)
+                 << sf_parameter_str_map.at(sf_parameter::SETTINGS_UNKNOWN)
+                 << '(' << std::to_string(setting_pair.first)
                  << "): " << setting_pair.second << '\n';
       continue;
     }

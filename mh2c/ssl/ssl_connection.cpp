@@ -113,8 +113,9 @@ void ssl_connection::write(const uint8_t* data, const size_t length) {
 void ssl_connection::read(uint8_t* data, const size_t length) {
   const auto result = BIO_read(m_ssl_bio, data, length);
   if (result <= 0 || static_cast<size_t>(result) != length) {
-    throw std::runtime_error("BIO_read failed: result=" + std::to_string(result) +
-                             ", length=" + std::to_string(length));
+    throw std::runtime_error(
+        "BIO_read failed: result=" + std::to_string(result) +
+        ", length=" + std::to_string(length));
   }
   return;
 }

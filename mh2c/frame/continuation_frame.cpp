@@ -88,7 +88,9 @@ continuation_frame::continuation_frame(const frame_header& fh,
 
 frame_header continuation_frame::get_header() const { return m_header; }
 
-header_block_t continuation_frame::get_payload() const { return m_header_block; }
+header_block_t continuation_frame::get_payload() const {
+  return m_header_block;
+}
 
 byte_array_t continuation_frame::serialize() const {
   byte_array_t serialized_cf = mh2c::serialize(m_header);
@@ -116,13 +118,15 @@ void continuation_frame::dump(std::ostream& out_stream) const {
   return;
 }
 
-std::ostream& operator<<(std::ostream& out_stream, const continuation_frame& hf) {
+std::ostream& operator<<(std::ostream& out_stream,
+                         const continuation_frame& hf) {
   hf.dump(out_stream);
   return out_stream;
 }
 
 bool operator==(const continuation_frame& lhs, const continuation_frame& rhs) {
-  return lhs.m_header == rhs.m_header && lhs.m_header_block == rhs.m_header_block;
+  return lhs.m_header == rhs.m_header &&
+         lhs.m_header_block == rhs.m_header_block;
 }
 
 bool operator!=(const continuation_frame& lhs, const continuation_frame& rhs) {

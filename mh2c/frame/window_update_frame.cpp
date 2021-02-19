@@ -25,8 +25,8 @@ constexpr window_size_t MAX_WINDOW_SIZE{0x7fffffff};
 constexpr uint8_t WINDOW_SIZE_BITS{31u};
 
 frame_header construct_frame_header(const fh_stream_id_t stream_id) {
-  return {4u, static_cast<fh_type_t>(frame_type_registry::WINDOW_UPDATE), 0u, 0u,
-          stream_id};
+  return {4u, static_cast<fh_type_t>(frame_type_registry::WINDOW_UPDATE), 0u,
+          0u, stream_id};
 }
 
 reserved_t construct_reserved(const byte_array_t& raw_payload) {
@@ -117,12 +117,14 @@ std::ostream& operator<<(std::ostream& out_stream,
   return out_stream;
 }
 
-bool operator==(const window_update_frame& lhs, const window_update_frame& rhs) {
+bool operator==(const window_update_frame& lhs,
+                const window_update_frame& rhs) {
   return lhs.m_header == rhs.m_header && lhs.m_reserved == rhs.m_reserved &&
          lhs.m_window_size_increment == rhs.m_window_size_increment;
 }
 
-bool operator!=(const window_update_frame& lhs, const window_update_frame& rhs) {
+bool operator!=(const window_update_frame& lhs,
+                const window_update_frame& rhs) {
   return !(lhs == rhs);
 }
 

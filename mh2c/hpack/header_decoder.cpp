@@ -103,8 +103,10 @@ decoded_int_t decode_max_size(const byte_array_t& encoded_max_size) {
 decoded_string_t decode_header_name(const byte_array_t& encoded_header_name) {
   // decode length of header name
   constexpr auto bit_length{7u};
-  const auto name_length = decode_integer_value<bit_length>(encoded_header_name);
-  auto decoded_byte_length = encode_integer_value<bit_length>(name_length).size();
+  const auto name_length =
+      decode_integer_value<bit_length>(encoded_header_name);
+  auto decoded_byte_length =
+      encode_integer_value<bit_length>(name_length).size();
 
   // decode header name
   const auto is_huffman_encode = extract_high_bit<1>(encoded_header_name[0]);
@@ -116,9 +118,9 @@ decoded_string_t decode_header_name(const byte_array_t& encoded_header_name) {
     header_name = {reinterpret_cast<const char*>(&huffman_decoded_data[0]),
                    huffman_decoded_data.size()};
   } else {
-    header_name = {
-        reinterpret_cast<const char*>(&encoded_header_name[decoded_byte_length]),
-        name_length};
+    header_name = {reinterpret_cast<const char*>(
+                       &encoded_header_name[decoded_byte_length]),
+                   name_length};
   }
   decoded_byte_length += name_length;
 
@@ -143,9 +145,9 @@ decoded_string_t decode_header_value(const byte_array_t& encoded_header_value) {
     header_value = {reinterpret_cast<const char*>(&huffman_decoded_data[0]),
                     huffman_decoded_data.size()};
   } else {
-    header_value = {
-        reinterpret_cast<const char*>(&encoded_header_value[decoded_byte_length]),
-        value_length};
+    header_value = {reinterpret_cast<const char*>(
+                        &encoded_header_value[decoded_byte_length]),
+                    value_length};
   }
   decoded_byte_length += value_length;
 
@@ -177,9 +179,9 @@ decoded_header_t decode_header(const byte_array_t& encoded_header,
   // decode index
   const auto [index, index_byte_length] = decode_index(encoded_data, prefix);
   const auto indexed_header =
-      (index > 0
-           ? header_block_entry{prefix, make_indexed_header(index, dynamic_table)}
-           : header_block_entry{prefix, {"", ""}});
+      (index > 0 ? header_block_entry{prefix,
+                                      make_indexed_header(index, dynamic_table)}
+                 : header_block_entry{prefix, {"", ""}});
   if (prefix == header_prefix_pattern::INDEXED) {
     return {indexed_header, index_byte_length};
   }

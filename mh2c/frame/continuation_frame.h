@@ -43,7 +43,8 @@ class continuation_frame : public i_frame<frame_header> {
                          const continuation_frame& rhs);
 };
 
-std::ostream& operator<<(std::ostream& out_stream, const continuation_frame& hf);
+std::ostream& operator<<(std::ostream& out_stream,
+                         const continuation_frame& hf);
 bool operator==(const continuation_frame& lhs, const continuation_frame& rhs);
 bool operator!=(const continuation_frame& lhs, const continuation_frame& rhs);
 
