@@ -13,12 +13,12 @@ if (clang_format_path AND NOT WIN32)
 endif()
 
 if (cpplint_path)
-    message(STATUS "Found cpplint: ${cpplint_path}")
-    message(STATUS "Add 'lint' custom target")
-    add_custom_target(lint
-      COMMAND
-        cpplint --filter=-build/c++11 --recursive ${PROJECT_SOURCE_DIR}/mh2c ${PROJECT_SOURCE_DIR}/sample ${PROJECT_SOURCE_DIR}/test
-      WORKING_DIRECTORY
-        ${PROJECT_SOURCE_DIR}
-    )
+  message(STATUS "Found cpplint: ${cpplint_path}")
+  message(STATUS "Add 'lint' custom target")
+  add_custom_target(lint
+    COMMAND
+      cpplint --filter=-build/c++11 --recursive ${PROJECT_SOURCE_DIR}/mh2c ${PROJECT_SOURCE_DIR}/sample ${PROJECT_SOURCE_DIR}/test
+    WORKING_DIRECTORY
+      ${PROJECT_SOURCE_DIR}
+  )
 endif()
