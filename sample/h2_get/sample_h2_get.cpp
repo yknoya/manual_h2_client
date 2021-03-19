@@ -9,14 +9,13 @@
 
 bool is_more_data(const mh2c::frame_header& fh) {
   auto result = true;
-  switch (fh.m_type) {
-    case static_cast<mh2c::fh_type_t>(mh2c::frame_type_registry::DATA):
-      if (fh.m_flags &
-          static_cast<mh2c::fh_flags_t>(mh2c::df_flag::END_STREAM)) {
+  switch (mh2c::cast_to_frame_type_registry(fh.m_type)) {
+    case mh2c::frame_type_registry::DATA:
+      if (mh2c::is_flag_set(fh.m_flags, mh2c::df_flag::END_STREAM)) {
         result = false;
       }
       break;
-    case static_cast<mh2c::fh_type_t>(mh2c::frame_type_registry::GOAWAY):
+    case mh2c::frame_type_registry::GOAWAY:
       result = false;
       break;
     default:
@@ -74,14 +73,14 @@ int main() {
   std::cout << frame;
 
   // Send settings frame (ack)
-  flags = static_cast<mh2c::fh_flags_t>(mh2c::sf_flag::ACK);
+  flags = make_frame_header_flags(mh2c::sf_flag::ACK);
   stream_id = 0u;
   const mh2c::settings_frame sf_ack{flags, stream_id, {}};
   h2_client.send_frame(sf_ack);
 
   // Send headers frame
-  flags = static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_STREAM) |
-          static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS);
+  flags = make_frame_header_flags(mh2c::hf_flag::END_STREAM,
+                                  mh2c::hf_flag::END_HEADERS);
   stream_id = 1u;
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
@@ -102,7 +101,7 @@ int main() {
 
   // Send GOAWAY frame
   if (last_frame_type !=
-      static_cast<mh2c::fh_type_t>(mh2c::frame_type_registry::GOAWAY)) {
+      mh2c::underlying_cast(mh2c::frame_type_registry::GOAWAY)) {
     const mh2c::goaway_payload gf_payload{
         0x0, stream_id, mh2c::error_codes::NO_ERROR, {}};
     const mh2c::goaway_frame gf{gf_payload};

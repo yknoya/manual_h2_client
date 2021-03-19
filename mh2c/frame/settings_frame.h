@@ -54,11 +54,18 @@ class settings_frame : public i_frame<frame_header> {
   friend bool operator==(const settings_frame& lhs, const settings_frame& rhs);
 };
 
-sf_pair_t make_sf_parameter(const sf_parameter id, const sf_value_t value);
 std::ostream& operator<<(std::ostream& out_stream, const settings_frame& sf);
 bool operator==(const settings_frame& lhs, const settings_frame& rhs);
 bool operator!=(const settings_frame& lhs, const settings_frame& rhs);
 
+template <typename T>
+inline sf_parameter cast_to_sf_parameter(T param);
+
+template <typename T>
+inline sf_pair_t make_sf_parameter(T id, const sf_value_t value);
+
 }  // namespace mh2c
+
+#include "mh2c/frame/settings_frame.ipp"
 
 #endif  // MH2C_FRAME_SETTINGS_FRAME_H_

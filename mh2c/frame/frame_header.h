@@ -51,6 +51,14 @@ std::ostream& operator<<(std::ostream& out_stream, const frame_header& fh);
 bool operator==(const frame_header& lhs, const frame_header& rhs);
 bool operator!=(const frame_header& lhs, const frame_header& rhs);
 
+template <typename T>
+inline fh_length_t cast_to_fh_length(T length);
+
+template <typename... Args>
+inline fh_flags_t make_frame_header_flags(Args... args);
+
 }  // namespace mh2c
+
+#include "mh2c/frame/frame_header.ipp"
 
 #endif  // MH2C_FRAME_FRAME_HEADER_H_

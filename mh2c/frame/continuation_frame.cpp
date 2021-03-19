@@ -14,6 +14,7 @@
 #include "mh2c/hpack/header_decoder.h"
 #include "mh2c/hpack/header_encoder.h"
 #include "mh2c/hpack/header_type.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -43,8 +44,8 @@ byte_array_t construct_encoded_payload(const fh_flags_t flags,
 
 frame_header construct_frame_header(fh_flags_t flags, fh_stream_id_t stream_id,
                                     byte_array_t encoded_payload) {
-  return {static_cast<fh_length_t>(encoded_payload.size()),
-          static_cast<fh_type_t>(frame_type_registry::CONTINUATION), flags, 0,
+  return {cast_to_fh_length(encoded_payload.size()),
+          underlying_cast(frame_type_registry::CONTINUATION), flags, 0,
           stream_id};
 }
 

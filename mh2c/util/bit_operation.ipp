@@ -6,6 +6,8 @@
 
 #include <cstddef>
 
+#include "mh2c/util/cast.h"
+
 namespace mh2c {
 
 template <size_t N, typename T, typename, typename>
@@ -26,7 +28,7 @@ bool is_flag_set(const T flags, const U flag) {
 
 template <typename T, typename U, typename, typename, typename>
 bool is_flag_set(const T flags, const U flag) {
-  return is_flag_set(flags, static_cast<std::underlying_type_t<U>>(flag));
+  return is_flag_set(flags, underlying_cast(flag));
 }
 
 }  // namespace mh2c

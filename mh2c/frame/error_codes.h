@@ -47,6 +47,11 @@ const std::unordered_map<error_codes, std::string> error_codes_str_map{
     {error_codes::UNKNOWN_ERROR, "UNKNOWN_ERROR"},
 };
 
+template <typename T>
+inline error_codes cast_to_error_codes(T error_code);
+
 }  // namespace mh2c
+
+#include "mh2c/frame/error_codes.ipp"
 
 #endif  // MH2C_FRAME_ERROR_CODES_H_

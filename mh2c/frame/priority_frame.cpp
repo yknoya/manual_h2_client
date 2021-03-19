@@ -15,6 +15,7 @@
 #include "mh2c/frame/frame_type_registry.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -24,9 +25,8 @@ constexpr fh_length_t PRIORITY_PAYLOAD_SIZE = 5u;
 constexpr uint8_t EXCLUSIVE_BITS{1u};
 
 frame_header construct_frame_header(const fh_stream_id_t stream_id) {
-  return {PRIORITY_PAYLOAD_SIZE,
-          static_cast<fh_type_t>(frame_type_registry::PRIORITY), 0u, 0u,
-          stream_id};
+  return {PRIORITY_PAYLOAD_SIZE, underlying_cast(frame_type_registry::PRIORITY),
+          0u, 0u, stream_id};
 }
 
 priority_payload construct_payload(const byte_array_t& raw_payload) {

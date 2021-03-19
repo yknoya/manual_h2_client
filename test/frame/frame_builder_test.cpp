@@ -12,6 +12,7 @@
 #include "mh2c/frame/common_type.h"
 #include "mh2c/frame/continuation_frame.h"
 #include "mh2c/frame/data_frame.h"
+#include "mh2c/frame/frame_header.h"
 #include "mh2c/frame/goaway_frame.h"
 #include "mh2c/frame/headers_frame.h"
 #include "mh2c/frame/ping_frame.h"
@@ -63,7 +64,7 @@ TEST(frame_builder_test, continuation_frame_no_flags) {
 
 TEST(frame_builder_test, continuation_frame_with_end_headers) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{mh2c::make_header_block(
       mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -86,7 +87,7 @@ TEST(frame_builder_test, continuation_frame_with_end_headers) {
 
 TEST(frame_builder_test, continuation_frame_never_indexed) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{mh2c::make_header_block(
       mh2c::header_prefix_pattern::NEVER_INDEXED,
@@ -109,7 +110,7 @@ TEST(frame_builder_test, continuation_frame_never_indexed) {
 
 TEST(frame_builder_test, continuation_frame_incremental_indexing) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{mh2c::make_header_block(
       mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
@@ -147,7 +148,7 @@ TEST(frame_builder_test, data_frame_no_flags) {
 
 TEST(frame_builder_test, data_frame_with_end_stream) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::df_flag::END_STREAM)};
+      mh2c::make_frame_header_flags(mh2c::df_flag::END_STREAM)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const std::string payload{"test"};
   const mh2c::data_frame expected_df{flags, stream_id, payload};
@@ -162,7 +163,7 @@ TEST(frame_builder_test, data_frame_with_end_stream) {
 
 TEST(frame_builder_test, data_frame_with_padded) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::df_flag::PADDED)};
+      mh2c::make_frame_header_flags(mh2c::df_flag::PADDED)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::byte_array_t payload{0x06, 't', 'e', 's', 't', 'p',
                                    'a',  'd', 'd', 'e', 'd'};
@@ -230,7 +231,7 @@ TEST(frame_builder_test, headers_frame_no_flags) {
 
 TEST(frame_builder_test, headers_frame_with_end_stream) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_STREAM)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_STREAM)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -256,7 +257,7 @@ TEST(frame_builder_test, headers_frame_with_end_stream) {
 
 TEST(frame_builder_test, headers_frame_with_end_headers) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -282,7 +283,7 @@ TEST(frame_builder_test, headers_frame_with_end_headers) {
 
 TEST(frame_builder_test, headers_frame_never_indexed) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
@@ -308,7 +309,7 @@ TEST(frame_builder_test, headers_frame_never_indexed) {
 
 TEST(frame_builder_test, headers_frame_incremental_indexing) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
@@ -334,7 +335,7 @@ TEST(frame_builder_test, headers_frame_incremental_indexing) {
 
 TEST(frame_builder_test, headers_frame_with_padding) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PADDED)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::PADDED)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -361,7 +362,7 @@ TEST(frame_builder_test, headers_frame_with_padding) {
 
 TEST(frame_builder_test, headers_frame_with_priority) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PRIORITY)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::PRIORITY)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -389,9 +390,8 @@ TEST(frame_builder_test, headers_frame_with_priority) {
 }
 
 TEST(frame_builder_test, headers_frame_with_padding_and_priority) {
-  const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PADDED) |
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PRIORITY)};
+  const mh2c::fh_flags_t flags{mh2c::make_frame_header_flags(
+      mh2c::hf_flag::PADDED, mh2c::hf_flag::PRIORITY)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -433,7 +433,7 @@ TEST(frame_builder_test, ping_frame) {
 TEST(frame_builder_test, ping_frame_with_ack) {
   const mh2c::byte_array_t opaque_data{'p', 'i', 'n', 'g'};
   const mh2c::ping_frame expected_pf{
-      static_cast<mh2c::fh_flags_t>(mh2c::pf_flag::ACK), opaque_data};
+      mh2c::make_frame_header_flags(mh2c::pf_flag::ACK), opaque_data};
   const auto raw_payload = extract_payload(expected_pf);
   mh2c::dynamic_table dynamic_table{};
   const auto frame =
@@ -504,7 +504,7 @@ TEST(frame_builder_test, push_promise_frame_no_flags) {
 
 TEST(frame_builder_test, push_promise_frame_with_end_headers) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::ppf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::ppf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -530,7 +530,7 @@ TEST(frame_builder_test, push_promise_frame_with_end_headers) {
 
 TEST(frame_builder_test, push_promise_frame_never_indexed) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,
@@ -556,7 +556,7 @@ TEST(frame_builder_test, push_promise_frame_never_indexed) {
 
 TEST(frame_builder_test, push_promise_frame_incremental_indexing) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
@@ -582,7 +582,7 @@ TEST(frame_builder_test, push_promise_frame_incremental_indexing) {
 
 TEST(frame_builder_test, push_promise_frame_with_padding) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PADDED)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::PADDED)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block{
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -672,7 +672,7 @@ TEST(frame_builder_test, settings_frame_full_settings) {
 
 TEST(frame_builder_test, settings_frame_ack) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::sf_flag::ACK)};
+      mh2c::make_frame_header_flags(mh2c::sf_flag::ACK)};
   const mh2c::fh_stream_id_t stream_id{0u};
   const mh2c::sf_payload_t sf_payload{};
   const mh2c::settings_frame expected_sf{flags, stream_id, sf_payload};

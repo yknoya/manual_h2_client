@@ -20,6 +20,7 @@
 #include "mh2c/hpack/static_table_definition.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -76,9 +77,8 @@ byte_array_t construct_encoded_payload(
 frame_header construct_frame_header(const fh_flags_t flags,
                                     const fh_stream_id_t stream_id,
                                     const byte_array_t& encoded_payload) {
-  return {static_cast<fh_length_t>(encoded_payload.size()),
-          static_cast<fh_type_t>(frame_type_registry::HEADERS), flags, 0,
-          stream_id};
+  return {cast_to_fh_length(encoded_payload.size()),
+          underlying_cast(frame_type_registry::HEADERS), flags, 0, stream_id};
 }
 
 struct decoded_payload_t {
@@ -95,8 +95,7 @@ decoded_payload_t decode_payload(const frame_header& fh,
 
   // Extract padding if needed
   byte_array_t padding{};
-  if ((fh.m_flags & static_cast<fh_flags_t>(hf_flag::PADDED)) ==
-      static_cast<fh_flags_t>(hf_flag::PADDED)) {
+  if (is_flag_set(fh.m_flags, hf_flag::PADDED)) {
     const auto pad_length = raw_data.front();
     const auto begin_padding = raw_data.end() - pad_length;
     const auto end_padding = raw_data.end();
@@ -108,8 +107,7 @@ decoded_payload_t decode_payload(const frame_header& fh,
 
   // Extract parameters for priority
   hf_priority_option priority_option{};
-  if ((fh.m_flags & static_cast<fh_flags_t>(hf_flag::PRIORITY)) ==
-      static_cast<fh_flags_t>(hf_flag::PRIORITY)) {
+  if (is_flag_set(fh.m_flags, hf_flag::PRIORITY)) {
     // Exclusive and Stream Dependency
     byte_array_t raw_stream_dependency{};
     const auto begin_stream_dependency = raw_data.begin();
@@ -184,8 +182,7 @@ void headers_frame::dump(std::ostream& out_stream) const {
   out_stream << "=== HEADERS FRAME ===\n" << m_header << "[PAYLOAD]\n";
 
   const bool contain_priority =
-      (m_header.m_flags & static_cast<fh_flags_t>(hf_flag::PRIORITY)) ==
-      static_cast<fh_flags_t>(hf_flag::PRIORITY);
+      is_flag_set(m_header.m_flags, hf_flag::PRIORITY);
   const auto exclusive =
       contain_priority ? std::to_string(m_priority_option.m_exclusive) : "";
   const auto stream_dependency =

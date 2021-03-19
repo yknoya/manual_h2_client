@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "mh2c/common/byte_array.h"
+#include "mh2c/frame/frame_header.h"
 
 TEST(ping_frame_test, serialize) {
   const mh2c::byte_array_t opaque_data{'p', 'i', 'n', 'g'};
@@ -26,7 +27,7 @@ TEST(ping_frame_test, serialize) {
 
 TEST(ping_frame_test, serialize_with_ack) {
   const mh2c::byte_array_t opaque_data{'p', 'i', 'n', 'g'};
-  const mh2c::ping_frame pf{static_cast<mh2c::fh_flags_t>(mh2c::pf_flag::ACK),
+  const mh2c::ping_frame pf{mh2c::make_frame_header_flags(mh2c::pf_flag::ACK),
                             opaque_data};
 
   const mh2c::byte_array_t expected_raw_pf{

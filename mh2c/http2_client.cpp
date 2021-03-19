@@ -22,6 +22,7 @@
 #include "mh2c/hpack/header_type.h"
 #include "mh2c/ssl/ssl_connection.h"
 #include "mh2c/util/byte_order.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -48,7 +49,7 @@ void update_dynamic_table(const h2_frame_ptr& frame_ptr,
                           dynamic_table* dynamic_table) {
   header_block_t header_block{};
 
-  switch (static_cast<frame_type_registry>(frame_ptr->get_header().m_type)) {
+  switch (cast_to_frame_type_registry(frame_ptr->get_header().m_type)) {
     case frame_type_registry::HEADERS:
       header_block =
           dynamic_cast<const headers_frame*>(frame_ptr.get())->get_payload();
@@ -66,8 +67,7 @@ void update_dynamic_table(const h2_frame_ptr& frame_ptr,
       const auto sf_payload =
           dynamic_cast<const settings_frame*>(frame_ptr.get())->get_payload();
       const auto table_size_key =
-          static_cast<std::underlying_type_t<sf_parameter>>(
-              sf_parameter::SETTINGS_HEADER_TABLE_SIZE);
+          underlying_cast(sf_parameter::SETTINGS_HEADER_TABLE_SIZE);
       if (sf_payload.find(table_size_key) != sf_payload.end()) {
         const auto table_size = sf_payload.at(table_size_key);
         dynamic_table->update_table_size(table_size);

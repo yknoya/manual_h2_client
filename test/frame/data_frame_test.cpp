@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "mh2c/common/byte_array.h"
+#include "mh2c/frame/frame_header.h"
 
 TEST(data_frame_test, serialize) {
   const mh2c::data_frame df{0x00, 0x01, "test"};
@@ -24,7 +25,7 @@ TEST(data_frame_test, serialize) {
 
 TEST(data_frame_test, serialize_with_padding) {
   const mh2c::data_frame df{
-      static_cast<mh2c::fh_flags_t>(mh2c::df_flag::PADDED), 0x01,
+      mh2c::make_frame_header_flags(mh2c::df_flag::PADDED), 0x01,
       mh2c::byte_array_t{0x02, 0x74, 0x65, 0x73, 0x74, 0xff, 0xff}};
 
   const mh2c::byte_array_t expected_raw_df{

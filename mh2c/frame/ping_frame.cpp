@@ -13,6 +13,7 @@
 #include "mh2c/common/byte_array.h"
 #include "mh2c/frame/frame_header.h"
 #include "mh2c/frame/frame_type_registry.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -21,8 +22,8 @@ namespace {
 constexpr uint8_t OPAQUE_DATA_SIZE{8u};
 
 frame_header construct_frame_header(const fh_flags_t flags) {
-  return {OPAQUE_DATA_SIZE, static_cast<fh_type_t>(frame_type_registry::PING),
-          flags, 0u, 0u};
+  return {OPAQUE_DATA_SIZE, underlying_cast(frame_type_registry::PING), flags,
+          0u, 0u};
 }
 
 byte_array_t construct_opaque_data(const byte_array_t& opaque_data) {

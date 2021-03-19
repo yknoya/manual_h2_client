@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "mh2c/common/byte_array.h"
+#include "mh2c/frame/frame_header.h"
 #include "mh2c/hpack/dynamic_table.h"
 #include "mh2c/hpack/header_type.h"
 
@@ -218,7 +219,7 @@ TEST(headers_frame_test, serialize_size_update) {
 
 TEST(headers_frame_test, serialize_literal_header_with_padding) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PADDED)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::PADDED)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block(
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -249,7 +250,7 @@ TEST(headers_frame_test, serialize_literal_header_with_padding) {
 
 TEST(headers_frame_test, serialize_literal_header_with_priority) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::PRIORITY)};
+      mh2c::make_frame_header_flags(mh2c::hf_flag::PRIORITY)};
   const mh2c::fh_stream_id_t stream_id{3u};
   const mh2c::header_block_t header_block(
       mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -307,9 +308,8 @@ TEST(headers_frame_test, serialize_literal_header_with_huffman_code) {
 }
 
 TEST(headers_frame_test, multi_headers) {
-  const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_STREAM) |
-      static_cast<mh2c::fh_flags_t>(mh2c::hf_flag::END_HEADERS)};
+  const mh2c::fh_flags_t flags{mh2c::make_frame_header_flags(
+      mh2c::hf_flag::END_STREAM, mh2c::hf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block(
       mh2c::make_header_block(mh2c::header_prefix_pattern::NEVER_INDEXED,

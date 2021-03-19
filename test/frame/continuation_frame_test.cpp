@@ -6,6 +6,7 @@
 #include <gtest/gtest.h>
 
 #include "mh2c/common/byte_array.h"
+#include "mh2c/frame/frame_header.h"
 #include "mh2c/hpack/dynamic_table.h"
 #include "mh2c/hpack/header_type.h"
 
@@ -34,7 +35,7 @@ TEST(continuation_frame_test, serialize_indexed_header) {
 
 TEST(continuation_frame_test, serialize_indexed_header_with_end_headers) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::cf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::cf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block(mh2c::make_header_block(
       mh2c::header_prefix_pattern::NEVER_INDEXED,
@@ -275,7 +276,7 @@ TEST(continuation_frame_test, serialize_literal_header_with_huffman_code) {
 
 TEST(continuation_frame_test, multi_headers) {
   const mh2c::fh_flags_t flags{
-      static_cast<mh2c::fh_flags_t>(mh2c::cf_flag::END_HEADERS)};
+      mh2c::make_frame_header_flags(mh2c::cf_flag::END_HEADERS)};
   const mh2c::fh_stream_id_t stream_id{1u};
   const mh2c::header_block_t header_block(mh2c::make_header_block(
       mh2c::header_prefix_pattern::NEVER_INDEXED,

@@ -32,6 +32,11 @@ void fill_record(encode_table_value* dst, encode_table_value* src) {
   return;
 }
 
+template <typename T>
+inline auto cast_to_byte_array_valut_type(T value) {
+  return static_cast<byte_array_t::value_type>(value);
+}
+
 }  // namespace
 
 byte_array_t encode(const byte_array_t& raw_data) {
@@ -53,7 +58,7 @@ byte_array_t encode(const byte_array_t& raw_data) {
       fill_record(&carry_over_record, &encode_table_record);
 
       encoded_data.push_back(
-          static_cast<byte_array_t::value_type>(carry_over_record.first));
+          cast_to_byte_array_valut_type(carry_over_record.first));
       carry_over_record = {0u, 0u};
 
       remain_bit_size = encode_table_record.second;
@@ -72,7 +77,7 @@ byte_array_t encode(const byte_array_t& raw_data) {
         eos_record.first >> (eos_record.second - pad_bit_size);
 
     const auto last_byte = (carry_over_record.first << pad_bit_size) | pad_bits;
-    encoded_data.push_back(static_cast<byte_array_t::value_type>(last_byte));
+    encoded_data.push_back(cast_to_byte_array_valut_type(last_byte));
   }
 
   return encoded_data;

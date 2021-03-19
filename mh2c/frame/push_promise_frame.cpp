@@ -19,6 +19,7 @@
 #include "mh2c/hpack/header_encoder.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -67,8 +68,8 @@ byte_array_t construct_encoded_payload(const fh_flags_t flags,
 frame_header construct_frame_header(const fh_flags_t flags,
                                     const fh_stream_id_t stream_id,
                                     const size_t payload_size) {
-  return {static_cast<fh_length_t>(payload_size),
-          static_cast<fh_type_t>(frame_type_registry::PUSH_PROMISE), flags, 0,
+  return {cast_to_fh_length(payload_size),
+          underlying_cast(frame_type_registry::PUSH_PROMISE), flags, 0,
           stream_id};
 }
 

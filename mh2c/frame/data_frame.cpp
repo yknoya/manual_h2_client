@@ -15,6 +15,7 @@
 #include "mh2c/frame/frame_header.h"
 #include "mh2c/frame/frame_type_registry.h"
 #include "mh2c/util/bit_operation.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -23,9 +24,8 @@ namespace {
 template <typename Payload>
 frame_header construct_frame_header(fh_flags_t flags, fh_stream_id_t stream_id,
                                     const Payload& payload) {
-  const fh_length_t length = payload.size();
-  return {length, static_cast<fh_type_t>(frame_type_registry::DATA), flags, 0,
-          stream_id};
+  return {cast_to_fh_length(payload.size()),
+          underlying_cast(frame_type_registry::DATA), flags, 0, stream_id};
 }
 
 }  // namespace

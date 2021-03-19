@@ -14,6 +14,7 @@
 #include "mh2c/hpack/huffman_encoder.h"
 #include "mh2c/hpack/integer_representation.h"
 #include "mh2c/hpack/static_table_definition.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -24,21 +25,20 @@ byte_array_t encode_index(const size_t index,
   switch (prefix) {
     case header_prefix_pattern::INDEXED:
       encoded_index = encode_integer_value<7>(index);
-      encoded_index[0] |= static_cast<byte_array_t::value_type>(prefix);
+      encoded_index[0] |= underlying_cast(prefix);
       break;
     case header_prefix_pattern::INCREMENTAL_INDEXING:
       encoded_index = encode_integer_value<6>(index);
-      encoded_index[0] |= static_cast<byte_array_t::value_type>(prefix);
+      encoded_index[0] |= underlying_cast(prefix);
       break;
     case header_prefix_pattern::WITHOUT_INDEXING:
     case header_prefix_pattern::NEVER_INDEXED:
       encoded_index = encode_integer_value<4>(index);
-      encoded_index[0] |= static_cast<byte_array_t::value_type>(prefix);
+      encoded_index[0] |= underlying_cast(prefix);
       break;
     default:
       const auto msg =
-          "prefix is invalid: " +
-          std::to_string(static_cast<byte_array_t::value_type>(prefix));
+          "prefix is invalid: " + std::to_string(underlying_cast(prefix));
       throw std::invalid_argument(msg);
       break;
   }
@@ -49,7 +49,7 @@ byte_array_t encode_index(const size_t index,
 byte_array_t encode_max_size(const size_t max_size,
                              const header_prefix_pattern prefix) {
   byte_array_t encoded_max_size = encode_integer_value<5>(max_size);
-  encoded_max_size[0] |= static_cast<byte_array_t::value_type>(prefix);
+  encoded_max_size[0] |= underlying_cast(prefix);
   return encoded_max_size;
 }
 
@@ -65,8 +65,7 @@ byte_array_t encode_header_value(const header_value_t& header_value,
                                  : header_value_bytes;
 
   // Emcpde header value length
-  const auto flag_huffman_encode =
-      static_cast<byte_array_t::value_type>(encode_mode);
+  const auto flag_huffman_encode = underlying_cast(encode_mode);
   auto encoded_header_value_length =
       encode_integer_value<7>(encoded_bytes.size());
   encoded_header_value_length[0] |= flag_huffman_encode;
@@ -92,8 +91,7 @@ byte_array_t encode_header_name(const header_name_t& header_name,
                                  : header_name_bytes;
 
   // Emcpde header name length
-  const auto flag_huffman_encode =
-      static_cast<byte_array_t::value_type>(encode_mode);
+  const auto flag_huffman_encode = underlying_cast(encode_mode);
   auto encoded_header_name_length =
       encode_integer_value<7>(encoded_bytes.size());
   encoded_header_name_length[0] |= flag_huffman_encode;

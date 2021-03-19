@@ -21,9 +21,8 @@ namespace mh2c {
 namespace {
 
 frame_header construct_frame_header(const fh_stream_id_t stream_id) {
-  return {static_cast<fh_length_t>(sizeof(error_codes)),
-          static_cast<fh_type_t>(frame_type_registry::RST_STREAM), 0u, 0u,
-          stream_id};
+  return {cast_to_fh_length(sizeof(error_codes)),
+          underlying_cast(frame_type_registry::RST_STREAM), 0u, 0u, stream_id};
 }
 
 error_codes construct_error_code(const byte_array_t& raw_payload) {
@@ -36,7 +35,7 @@ error_codes construct_error_code(const byte_array_t& raw_payload) {
   const auto error_code =
       bytes2integral<std::underlying_type_t<error_codes>>(raw_payload.begin());
 
-  return static_cast<error_codes>(error_code);
+  return cast_to_error_codes(error_code);
 }
 
 }  // namespace
@@ -56,8 +55,7 @@ error_codes rst_stream_frame::get_payload() const { return m_error_code; }
 byte_array_t rst_stream_frame::serialize() const {
   byte_array_t serialized_rsf = mh2c::serialize(m_header);
 
-  const auto error_code = cvt_host2net(
-      static_cast<std::underlying_type_t<error_codes>>(m_error_code));
+  const auto error_code = cvt_host2net(underlying_cast(m_error_code));
   auto begin = reinterpret_cast<const byte_array_t::value_type*>(&error_code);
   std::copy(begin, begin + sizeof(error_code),
             std::back_inserter(serialized_rsf));
@@ -75,8 +73,7 @@ void rst_stream_frame::dump(std::ostream& out_stream) const {
   } else {
     out_stream << "  Error Code: "
                << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR)
-               << "(" << std::to_string(static_cast<uint32_t>(m_error_code))
-               << ")\n";
+               << "(" << std::to_string(underlying_cast(m_error_code)) << ")\n";
   }
   return;
 }

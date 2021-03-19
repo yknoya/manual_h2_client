@@ -15,6 +15,7 @@
 #include "mh2c/frame/frame_type_registry.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -25,8 +26,7 @@ frame_header construct_frame_header(const goaway_payload& payload) {
                              sizeof(payload.m_error_code) +
                              payload.m_additional_debug_data.size();
 
-  return {length, static_cast<fh_type_t>(frame_type_registry::GOAWAY), 0u, 0u,
-          0u};
+  return {length, underlying_cast(frame_type_registry::GOAWAY), 0u, 0u, 0u};
 }
 
 goaway_payload construct_payload(const byte_array_t& raw_payload) {
@@ -49,7 +49,7 @@ goaway_payload construct_payload(const byte_array_t& raw_payload) {
   const auto raw_error_code =
       bytes2integral<std::underlying_type_t<error_codes>>(
           raw_payload.begin() + sizeof(r_and_last_stream_id));
-  const auto error_code = static_cast<error_codes>(raw_error_code);
+  const auto error_code = cast_to_error_codes(raw_error_code);
 
   // Additional Debug Data
   byte_array_t additional_debug_data{};
@@ -98,8 +98,7 @@ byte_array_t goaway_frame::serialize() const {
             std::back_inserter(serialzed_gf));
 
   // Serialize Error Code
-  const auto error_code =
-      cvt_host2net(static_cast<uint32_t>(m_payload.m_error_code));
+  const auto error_code = cvt_host2net(underlying_cast(m_payload.m_error_code));
   begin = reinterpret_cast<const uint8_t*>(&error_code);
   std::copy(begin, begin + sizeof(error_codes),
             std::back_inserter(serialzed_gf));
@@ -128,8 +127,7 @@ void goaway_frame::dump(std::ostream& out_stream) const {
   } else {
     out_stream << "  Error Code: "
                << error_codes_str_map.at(mh2c::error_codes::UNKNOWN_ERROR)
-               << "(" << std::to_string(static_cast<uint32_t>(error_code))
-               << ")\n";
+               << "(" << std::to_string(underlying_cast(error_code)) << ")\n";
   }
   out_stream << "  Additional Debug Data: ";
   if (m_payload.m_additional_debug_data.empty() == false) {

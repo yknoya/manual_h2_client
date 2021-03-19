@@ -16,6 +16,7 @@
 #include "mh2c/hpack/integer_representation.h"
 #include "mh2c/hpack/static_table_definition.h"
 #include "mh2c/util/bit_operation.h"
+#include "mh2c/util/cast.h"
 
 namespace mh2c {
 
@@ -82,8 +83,7 @@ decoded_int_t decode_index(const byte_array_t& encoded_index,
     }
     default:
       const auto msg =
-          "prefix is invalid: " +
-          std::to_string(static_cast<byte_array_t::value_type>(prefix));
+          "prefix is invalid: " + std::to_string(underlying_cast(prefix));
       throw std::invalid_argument(msg);
       break;
   }

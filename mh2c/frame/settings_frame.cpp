@@ -41,8 +41,8 @@ frame_header construct_frame_header(fh_flags_t flags, fh_stream_id_t stream_id,
   const fh_length_t length =
       (sizeof(sf_id_t) + sizeof(sf_value_t)) * payload.size();
 
-  return {length, static_cast<fh_type_t>(frame_type_registry::SETTINGS), flags,
-          0, stream_id};
+  return {length, underlying_cast(frame_type_registry::SETTINGS), flags, 0,
+          stream_id};
 }
 
 }  // namespace
@@ -86,9 +86,8 @@ void settings_frame::dump(std::ostream& out_stream) const {
 
   for (const auto& setting_pair : m_payload) {
     if (setting_pair.first <
-            static_cast<sf_id_t>(sf_parameter::SETTINGS_HEADER_TABLE_SIZE) ||
-        setting_pair.first >=
-            static_cast<sf_id_t>(sf_parameter::SETTINGS_UNKNOWN)) {
+            underlying_cast(sf_parameter::SETTINGS_HEADER_TABLE_SIZE) ||
+        setting_pair.first >= underlying_cast(sf_parameter::SETTINGS_UNKNOWN)) {
       out_stream << "  "
                  << sf_parameter_str_map.at(sf_parameter::SETTINGS_UNKNOWN)
                  << '(' << std::to_string(setting_pair.first)
@@ -96,7 +95,7 @@ void settings_frame::dump(std::ostream& out_stream) const {
       continue;
     }
 
-    const auto key = static_cast<sf_parameter>(setting_pair.first);
+    const auto key = cast_to_sf_parameter(setting_pair.first);
     out_stream << "  " << sf_parameter_str_map.at(key) << ": "
                << setting_pair.second << '\n';
   }
@@ -105,10 +104,6 @@ void settings_frame::dump(std::ostream& out_stream) const {
 /*
  * Definitions of function for settings_frame
  */
-sf_pair_t make_sf_parameter(const sf_parameter id, const sf_value_t value) {
-  return {static_cast<mh2c::sf_id_t>(id), value};
-}
-
 std::ostream& operator<<(std::ostream& out_stream, const settings_frame& sf) {
   sf.dump(out_stream);
   return out_stream;

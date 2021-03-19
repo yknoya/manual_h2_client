@@ -104,7 +104,7 @@ h2_frame_ptr build_settings_frame(const frame_header& fh,
     ite += sizeof(id);
     auto value = bytes2integral<sf_value_t>(ite);
     ite += sizeof(value);
-    payload.insert(make_sf_parameter(static_cast<sf_parameter>(id), value));
+    payload.insert(make_sf_parameter(id, value));
   }
 
   return std::make_unique<settings_frame>(fh.m_flags, fh.m_stream_id, payload);
@@ -137,7 +137,7 @@ const std::unordered_map<frame_type_registry, builder_func_t> builder_func_map{
 
 h2_frame_ptr build_frame(const frame_header& fh, const byte_array_t& payload,
                          const dynamic_table& dynamic_table) {
-  const auto key = static_cast<frame_type_registry>(fh.m_type);
+  const auto key = cast_to_frame_type_registry(fh.m_type);
   const auto builder_func = builder_func_map.at(key);
   return builder_func(fh, payload, dynamic_table);
 }

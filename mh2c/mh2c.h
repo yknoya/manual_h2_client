@@ -24,5 +24,7 @@
 #include "mh2c/hpack/header_type.h"
 #include "mh2c/http2_client.h"
 #include "mh2c/ssl/ssl_verify_mode.h"
+#include "mh2c/util/bit_operation.h"
+#include "mh2c/util/cast.h"
 
 #endif  // MH2C_MH2C_H_
