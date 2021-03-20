@@ -83,6 +83,6 @@ byte_array_t encode(const byte_array_t& raw_data) {
   return encoded_data;
 }
 
-};  // namespace huffman
+}  // namespace huffman
 
-};  // namespace mh2c
+}  // namespace mh2c

@@ -56,10 +56,11 @@ const dynamic_table::container_type& dynamic_table::get_entries() const {
   return m_entries;
 }
 
-const dynamic_table::size_type dynamic_table::get_table_size() const {
+dynamic_table::size_type dynamic_table::get_table_size() const {
   return m_table_size;
 }
-const dynamic_table::size_type dynamic_table::get_max_table_size() const {
+
+dynamic_table::size_type dynamic_table::get_max_table_size() const {
   return m_max_table_size;
 }
 

@@ -40,7 +40,10 @@ target_include_directories(mh2c
 
 target_compile_options(mh2c
   PUBLIC
+    "-Werror"
     "-Wall"
+    "-Wextra"
+    "-Wpedantic"
 )
 
 target_link_libraries(mh2c

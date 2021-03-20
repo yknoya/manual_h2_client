@@ -36,8 +36,8 @@ class dynamic_table {
   void update_table_size(const size_type new_size);
 
   const container_type& get_entries() const;
-  const size_type get_table_size() const;
-  const size_type get_max_table_size() const;
+  size_type get_table_size() const;
+  size_type get_max_table_size() const;
 
   iterator begin();
   const_iterator begin() const;

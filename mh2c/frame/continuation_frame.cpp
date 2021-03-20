@@ -23,8 +23,7 @@ namespace mh2c {
  */
 namespace {
 
-byte_array_t construct_encoded_payload(const fh_flags_t flags,
-                                       const header_block_t& header_block,
+byte_array_t construct_encoded_payload(const header_block_t& header_block,
                                        const header_encode_mode mode,
                                        const dynamic_table& dynamic_table) {
   byte_array_t encoded_payload{};
@@ -49,8 +48,7 @@ frame_header construct_frame_header(fh_flags_t flags, fh_stream_id_t stream_id,
           stream_id};
 }
 
-header_block_t decode_payload(const frame_header& fh,
-                              const byte_array_t& raw_payload,
+header_block_t decode_payload(const byte_array_t& raw_payload,
                               const dynamic_table& dynamic_table) {
   auto raw_data{raw_payload};
   header_block_t header_block{};
@@ -75,7 +73,7 @@ continuation_frame::continuation_frame(const fh_flags_t flags,
                                        const header_block_t& header_block,
                                        const header_encode_mode mode,
                                        const dynamic_table& dynamic_table)
-    : m_encoded_payload{construct_encoded_payload(flags, header_block, mode,
+    : m_encoded_payload{construct_encoded_payload(header_block, mode,
                                                   dynamic_table)},
       m_header{construct_frame_header(flags, stream_id, m_encoded_payload)},
       m_header_block{header_block} {}
@@ -85,7 +83,7 @@ continuation_frame::continuation_frame(const frame_header& fh,
                                        const dynamic_table& dynamic_table)
     : m_encoded_payload{raw_payload},
       m_header{fh},
-      m_header_block{decode_payload(fh, raw_payload, dynamic_table)} {}
+      m_header_block{decode_payload(raw_payload, dynamic_table)} {}
 
 frame_header continuation_frame::get_header() const { return m_header; }
 
