@@ -10,18 +10,13 @@
 TEST(settings_frame_test, serialize) {
   const mh2c::fh_flags_t flags = 0u;
   const mh2c::fh_stream_id_t stream_id = 0u;
-  const mh2c::sf_payload_t sf_payload{
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE,
-                              512u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u),
-      mh2c::make_sf_parameter(
-          mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM, 16u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE,
-                              65535u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_FRAME_SIZE,
-                              65535u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_MAX_HEADER_LIST_SIZE,
-                              256u)};
+  const mh2c::sf_payload_t sf_payload{mh2c::make_sf_payload(
+      {{mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE, 512u},
+       {mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u},
+       {mh2c::sf_parameter::SETTINGS_MAX_CONCURRENT_STREAM, 16u},
+       {mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE, 65535u},
+       {mh2c::sf_parameter::SETTINGS_MAX_FRAME_SIZE, 65535u},
+       {mh2c::sf_parameter::SETTINGS_MAX_HEADER_LIST_SIZE, 256u}})};
   const mh2c::settings_frame sf(flags, stream_id, sf_payload);
 
   const mh2c::byte_array_t expected_raw_sf{

@@ -5,6 +5,7 @@
 #define MH2C_FRAME_SETTINGS_FRAME_H_
 
 #include <cstdint>
+#include <initializer_list>
 #include <map>
 #include <ostream>
 #include <utility>
@@ -63,6 +64,10 @@ inline sf_parameter cast_to_sf_parameter(T param);
 
 template <typename T>
 inline sf_pair_t make_sf_parameter(T id, const sf_value_t value);
+
+using sf_parameters =
+    std::initializer_list<std::pair<sf_parameter, sf_value_t>>;
+sf_payload_t make_sf_payload(const sf_parameters& parameters);
 
 }  // namespace mh2c
 

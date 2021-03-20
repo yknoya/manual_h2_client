@@ -58,12 +58,10 @@ int main() {
   mh2c::fh_flags_t flags{0u};
   mh2c::fh_stream_id_t stream_id{0u};
   const size_t initial_table_size{8192u};
-  const mh2c::sf_payload_t sf_payload{
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE,
-                              65535u),
-      mh2c::make_sf_parameter(mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE,
-                              initial_table_size)};
+  const auto sf_payload{mh2c::make_sf_payload(
+      {{mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u},
+       {mh2c::sf_parameter::SETTINGS_INITIAL_WINDOW_SIZE, 65535u},
+       {mh2c::sf_parameter::SETTINGS_HEADER_TABLE_SIZE, initial_table_size}})};
   mh2c::settings_frame sf{flags, stream_id, sf_payload};
   h2_client.send_frame(sf);
   h2_client.update_request_dynamic_table(initial_table_size);

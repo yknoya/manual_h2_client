@@ -117,4 +117,14 @@ bool operator!=(const settings_frame& lhs, const settings_frame& rhs) {
   return !(lhs == rhs);
 }
 
+sf_payload_t make_sf_payload(const sf_parameters& parameters) {
+  sf_payload_t sf_payload{};
+  std::for_each(parameters.begin(), parameters.end(),
+                [&sf_payload](const auto& parameter) {
+                  sf_payload.emplace(
+                      make_sf_parameter(parameter.first, parameter.second));
+                });
+  return sf_payload;
+}
+
 }  // namespace mh2c
