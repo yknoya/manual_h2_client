@@ -101,22 +101,37 @@ ssl_connection::ssl_connection(const std::string& hostname, const uint16_t port,
 }
 
 void ssl_connection::write(const uint8_t* data, const size_t length) {
-  const auto result = BIO_write(m_ssl_bio, data, length);
-  if (result <= 0 || static_cast<size_t>(result) != length) {
-    throw std::runtime_error(
-        "BIO_write failed: result=" + std::to_string(result) +
-        ", length=" + std::to_string(length));
+  size_t written_length{};
+
+  while (written_length < length) {
+    const auto remain_length = length - written_length;
+    const auto result =
+        BIO_write(m_ssl_bio, data + written_length, remain_length);
+    if (result <= 0) {
+      throw std::runtime_error(
+          "BIO_write failed: result=" + std::to_string(result) +
+          ", length=" + std::to_string(length));
+    }
+    written_length += result;
   }
+
   return;
 }
 
 void ssl_connection::read(uint8_t* data, const size_t length) {
-  const auto result = BIO_read(m_ssl_bio, data, length);
-  if (result <= 0 || static_cast<size_t>(result) != length) {
-    throw std::runtime_error(
-        "BIO_read failed: result=" + std::to_string(result) +
-        ", length=" + std::to_string(length));
+  size_t read_length{};
+
+  while (read_length < length) {
+    const auto remain_length = length - read_length;
+    const auto result = BIO_read(m_ssl_bio, data + read_length, remain_length);
+    if (result <= 0) {
+      throw std::runtime_error(
+          "BIO_read failed: result=" + std::to_string(result) +
+          ", length=" + std::to_string(length));
+    }
+    read_length += result;
   }
+
   return;
 }
 
