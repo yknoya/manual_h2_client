@@ -5,6 +5,7 @@
 #define MH2C_MH2C_H_
 
 #include "mh2c/common/byte_array.h"
+#include "mh2c/frame/common_type.h"
 #include "mh2c/frame/continuation_frame.h"
 #include "mh2c/frame/data_frame.h"
 #include "mh2c/frame/error_codes.h"
