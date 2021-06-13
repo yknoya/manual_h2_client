@@ -88,5 +88,5 @@ message(STATUS "private headers: ${mh2c_private_headers}")
 string(REPLACE ";" "|" mh2c_exclude_regex "${mh2c_private_headers}")
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/mh2c
   DESTINATION ${INSTALL_INCLUDEDIR}
-  FILES_MATCHING PATTERN "*.h" REGEX ${mh2c_exclude_regex} EXCLUDE
+  FILES_MATCHING PATTERN "*.h" PATTERN "*.ipp" REGEX ${mh2c_exclude_regex} EXCLUDE
 )
