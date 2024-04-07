@@ -29,7 +29,7 @@ $ cmake --build build --target lint
 ```
 
 ### How to use
-See [the sample code](https://github.com/k-noya/manual_h2_client/blob/master/sample).  
+See [the sample code](https://github.com/yknoya/manual_h2_client/blob/master/sample).  
 You can execute the sample code in the following command after the build.
 ```
 $ ./build/sample/h2_get/sample_h2_get

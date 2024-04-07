@@ -1,4 +1,4 @@
-// Copyright (c) 2021, k-noya
+// Copyright (c) 2021, yknoya
 // Distributed under the BSD 3-Clause License.
 // See accompanying file LICENSE
 #ifndef MH2C_FRAME_DATA_FRAME_H_
