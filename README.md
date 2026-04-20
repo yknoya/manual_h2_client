@@ -19,18 +19,39 @@ $ cmake -B build \
 $ cmake --build build
 ```
 
-You can execute the test, format, lint in the following command after the build.  
-Note that GoogleTest is required to test, clang-format is requried to format and cpplint is required to lint.
+The default configuration builds only the library. Tests and sample code are
+optional.
+
+Enable and run unit tests with:
+```
+$ cmake -B build \
+  -DOPENSSL_ROOT_DIR=/path/to/openssl \
+  -DBUILD_SHARED_LIBS=ON \
+  -DBUILD_TESTING=ON
+$ cmake --build build
+$ ctest --test-dir build --output-on-failure
+```
+
+Enable the sample program with:
+```
+$ cmake -B build \
+  -DOPENSSL_ROOT_DIR=/path/to/openssl \
+  -DBUILD_SHARED_LIBS=ON \
+  -DMH2C_BUILD_SAMPLE=ON
+$ cmake --build build
+```
+
+If the required tools are installed, you can also run formatting and linting:
 
 ```
-$ cmake --build build --target test
 $ cmake --build build --target format
 $ cmake --build build --target lint
 ```
 
 ### How to use
 See [the sample code](https://github.com/yknoya/manual_h2_client/blob/master/sample).  
-You can execute the sample code in the following command after the build.
+You can execute the sample code in the following command after building with
+`-DMH2C_BUILD_SAMPLE=ON`.
 ```
 $ ./build/sample/h2_get/sample_h2_get
 ```

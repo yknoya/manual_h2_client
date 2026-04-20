@@ -38,33 +38,69 @@ target_include_directories(mh2c
     ${PROJECT_SOURCE_DIR}
 )
 
-target_compile_options(mh2c
-  PRIVATE
-    "-Werror"
-    "-Wall"
-    "-Wextra"
-    "-Wpedantic"
-    "-g"
-)
+if (MSVC)
+  target_compile_options(mh2c
+    PRIVATE
+      /W4
+  )
+  if (MH2C_ENABLE_WERROR)
+    target_compile_options(mh2c
+      PRIVATE
+        /WX
+    )
+  endif()
+else()
+  target_compile_options(mh2c
+    PRIVATE
+      "-Wall"
+      "-Wextra"
+      "-Wpedantic"
+  )
+  if (MH2C_ENABLE_WERROR)
+    target_compile_options(mh2c
+      PRIVATE
+        "-Werror"
+    )
+  endif()
+endif()
 
 set_target_properties(mh2c
   PROPERTIES
     POSITION_INDEPENDENT_CODE ON
-    SOVERSION ${PROJECT_VERSION}
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
     OUTPUT_NAME "mh2c"
     DEBUG_POSTFIX "_d"
     MACOSX_RPATH OFF
 )
 
-target_link_libraries(mh2c
-  PRIVATE
-    OpenSSL::SSL
-    OpenSSL::Crypto
-)
+if(TARGET OpenSSL::SSL AND TARGET OpenSSL::Crypto)
+  target_link_libraries(mh2c
+    PRIVATE
+      OpenSSL::SSL
+      OpenSSL::Crypto
+  )
+else()
+  target_include_directories(mh2c
+    PRIVATE
+      ${OPENSSL_INCLUDE_DIR}
+  )
+  target_link_libraries(mh2c
+    PRIVATE
+      ${OPENSSL_LIBRARIES}
+  )
+endif()
 
 install(TARGETS mh2c
+  RUNTIME
+    COMPONENT lib
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
   LIBRARY
     COMPONENT lib
+    DESTINATION ${INSTALL_LIBDIR}
+    NAMELINK_COMPONENT devel
+  ARCHIVE
+    COMPONENT devel
     DESTINATION ${INSTALL_LIBDIR}
 )
 
@@ -87,6 +123,7 @@ message(STATUS "private headers: ${mh2c_private_headers}")
 
 string(REPLACE ";" "|" mh2c_exclude_regex "${mh2c_private_headers}")
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/mh2c
+  COMPONENT devel
   DESTINATION ${INSTALL_INCLUDEDIR}
   FILES_MATCHING PATTERN "*.h" PATTERN "*.ipp" REGEX ${mh2c_exclude_regex} EXCLUDE
 )

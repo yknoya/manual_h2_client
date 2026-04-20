@@ -10,9 +10,14 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_TESTING "Build tests" OFF)
+option(MH2C_BUILD_SAMPLE "Build sample executable" OFF)
+option(MH2C_ENABLE_WERROR "Treat compiler warnings as errors" OFF)
+
 message(STATUS "Project will be installed to ${CMAKE_INSTALL_PREFIX}")
 
-if (NOT CMAKE_BUILD_TYPE)
+if (NOT CMAKE_CONFIGURATION_TYPES AND
+    (NOT DEFINED CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL ""))
   set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
@@ -36,6 +41,12 @@ endforeach()
 
 add_subdirectory(lint)
 add_subdirectory(mh2c)
-enable_testing()
-add_subdirectory(test)
-add_subdirectory(sample/h2_get)
+include(CTest)
+
+if (BUILD_TESTING)
+  add_subdirectory(test)
+endif()
+
+if (MH2C_BUILD_SAMPLE)
+  add_subdirectory(sample/h2_get)
+endif()
