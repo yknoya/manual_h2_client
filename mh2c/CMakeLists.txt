@@ -105,7 +105,9 @@ install(TARGETS mh2c
 )
 
 set(mh2c_private_headers
+  "frame/header_block_utils.h"
   "frame/frame_builder.h"
+  "hpack/header_decoder_internal.h"
   "hpack/header_decoder.h"
   "hpack/header_encoder.h"
   "hpack/huffman_code.h"

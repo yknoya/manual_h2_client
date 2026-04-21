@@ -3,10 +3,6 @@
 // See accompanying file LICENSE
 #include "mh2c/frame/push_promise_frame.h"
 
-#include <algorithm>
-#include <cstdint>
-#include <iomanip>
-#include <iterator>
 #include <ostream>
 #include <string>
 
@@ -14,9 +10,8 @@
 #include "mh2c/frame/common_type.h"
 #include "mh2c/frame/frame_header.h"
 #include "mh2c/frame/frame_type_registry.h"
+#include "mh2c/frame/header_block_utils.h"
 #include "mh2c/hpack/dynamic_table.h"
-#include "mh2c/hpack/header_decoder.h"
-#include "mh2c/hpack/header_encoder.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
 #include "mh2c/util/cast.h"
@@ -47,14 +42,8 @@ byte_array_t construct_encoded_payload(const fh_flags_t flags,
   std::copy(begin, begin + sizeof(r_promised_stream_id),
             std::back_inserter(encoded_payload));
 
-  // Header Block
-  std::for_each(payload.m_header_block.begin(), payload.m_header_block.end(),
-                [&encoded_payload, mode, &dynamic_table](const auto& header) {
-                  const auto encoded_header =
-                      encode_header(header, mode, dynamic_table);
-                  std::copy(encoded_header.begin(), encoded_header.end(),
-                            std::back_inserter(encoded_payload));
-                });
+  detail::append_encoded_header_block(&encoded_payload, payload.m_header_block,
+                                      mode, dynamic_table);
 
   // Padding
   if (is_padded_set) {
@@ -76,43 +65,36 @@ frame_header construct_frame_header(const fh_flags_t flags,
 push_promise_payload decode_payload(const frame_header& fh,
                                     const byte_array_t& raw_payload,
                                     const dynamic_table& dynamic_table) {
-  auto raw_data{raw_payload};
+  auto payload_begin = raw_payload.begin();
+  auto payload_end = raw_payload.end();
 
-  // Extract Padding if needed
   byte_array_t padding{};
   if (is_flag_set(fh.m_flags, ppf_flag::PADDED)) {
-    if (raw_data.empty()) {
+    if (payload_begin == payload_end) {
       throw std::invalid_argument("missing pad length");
     }
 
-    const auto pad_length = raw_data.front();
-    if (raw_data.size() < 1u + pad_length) {
+    const auto pad_length = *payload_begin;
+    if (static_cast<size_t>(std::distance(payload_begin, payload_end)) <
+        1u + pad_length) {
       throw std::invalid_argument("invalid padded payload");
     }
-    const auto begin_padding = raw_data.end() - pad_length;
-    const auto end_padding = raw_data.end();
-    std::copy(begin_padding, end_padding, std::back_inserter(padding));
-
-    raw_data.erase(begin_padding, end_padding);
-    raw_data.erase(raw_data.begin());
+    ++payload_begin;
+    payload_end -= pad_length;
+    std::copy(payload_end, raw_payload.end(), std::back_inserter(padding));
   }
 
-  // Extract Reserved and Promised Stream ID
-  if (raw_data.size() < sizeof(fh_stream_id_t)) {
+  if (static_cast<size_t>(std::distance(payload_begin, payload_end)) <
+      sizeof(fh_stream_id_t)) {
     throw std::invalid_argument("invalid promised stream id payload");
   }
-  const reserved_t reserved = extract_high_bit<RESERVED_BITS>(raw_data[0]);
+  const reserved_t reserved = extract_high_bit<RESERVED_BITS>(*payload_begin);
   const auto promised_stream_id = extract_low_bit<STREAM_ID_BITS>(
-      bytes2integral<fh_stream_id_t>(raw_data.begin()));
-  raw_data.erase(raw_data.begin(), raw_data.begin() + sizeof(fh_stream_id_t));
+      bytes2integral<fh_stream_id_t>(payload_begin));
+  payload_begin += sizeof(fh_stream_id_t);
 
-  // Header Block
-  header_block_t header_block{};
-  while (raw_data.size() > 0) {
-    const auto decoded_header = decode_header(raw_data, dynamic_table);
-    header_block.push_back(decoded_header.first);
-    raw_data.erase(raw_data.begin(), raw_data.begin() + decoded_header.second);
-  }
+  const auto header_block =
+      detail::decode_header_block(payload_begin, payload_end, dynamic_table);
 
   return {reserved, promised_stream_id, header_block, padding};
 }  // namespace
@@ -138,9 +120,9 @@ push_promise_frame::push_promise_frame(const fh_flags_t flags,
                                        const header_encode_mode mode,
                                        const dynamic_table& dynamic_table)
     : m_encoded_payload{
-construct_encoded_payload(flags, payload, mode, dynamic_table)},
-      m_header{construct_frame_header(flags, stream_id,
-m_encoded_payload.size())},
+          construct_encoded_payload(flags, payload, mode, dynamic_table)},
+      m_header{
+          construct_frame_header(flags, stream_id, m_encoded_payload.size())},
       m_payload{payload} {}
 
 push_promise_frame::push_promise_frame(const frame_header& fh,
@@ -170,35 +152,12 @@ void push_promise_frame::dump(std::ostream& out_stream) const {
              << std::to_string(m_payload.m_promised_stream_id) << '\n';
 
   out_stream << "  Header Block:\n";
-  std::for_each(
-      m_payload.m_header_block.begin(), m_payload.m_header_block.end(),
-      [&out_stream](const auto& header_entry) {
-        if (header_entry.get_prefix() == header_prefix_pattern::SIZE_UPDATE) {
-          out_stream << "    " << std::to_string(header_entry.get_max_size())
-                     << " (dynamic table size update)\n";
-          return;
-        }
-        const auto header = header_entry.get_header();
-        out_stream << "    " << header.first << ": " << header.second << '\n';
-      });
+  detail::dump_header_block(out_stream, m_payload.m_header_block);
 
   out_stream << "  Padding:\n";
   const bool contain_padding = is_flag_set(m_header.m_flags, ppf_flag::PADDED);
   if (contain_padding) {
-    uint32_t counter{0};
-    out_stream << "    ";
-    std::for_each(m_payload.m_padding.begin(), m_payload.m_padding.end(),
-                  [&out_stream, &counter](const auto& elem) {
-                    out_stream << std::hex << std::setw(2) << std::setfill('0')
-                               << static_cast<int>(elem);
-                    if (++counter % 8 == 0) {
-                      out_stream << '\n';
-                      out_stream << "    ";
-                    } else {
-                      out_stream << ' ';
-                    }
-                  });
-    out_stream << '\n';
+    detail::dump_hex_bytes(out_stream, m_payload.m_padding);
   }
 
   return;

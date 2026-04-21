@@ -47,22 +47,25 @@ void update_dynamic_table(const header_block_t& header_block,
 
 void update_dynamic_table(const h2_frame_ptr& frame_ptr,
                           dynamic_table* dynamic_table) {
-  header_block_t header_block{};
-
   switch (cast_to_frame_type_registry(frame_ptr->get_header().m_type)) {
     case frame_type_registry::HEADERS:
-      header_block =
-          dynamic_cast<const headers_frame*>(frame_ptr.get())->get_payload();
-      break;
+      update_dynamic_table(
+          dynamic_cast<const headers_frame*>(frame_ptr.get())->get_payload(),
+          dynamic_table);
+      return;
     case frame_type_registry::PUSH_PROMISE:
-      header_block = dynamic_cast<const push_promise_frame*>(frame_ptr.get())
-                         ->get_payload()
-                         .m_header_block;
-      break;
+      update_dynamic_table(
+          dynamic_cast<const push_promise_frame*>(frame_ptr.get())
+              ->get_payload()
+              .m_header_block,
+          dynamic_table);
+      return;
     case frame_type_registry::CONTINUATION:
-      header_block = dynamic_cast<const continuation_frame*>(frame_ptr.get())
-                         ->get_payload();
-      break;
+      update_dynamic_table(
+          dynamic_cast<const continuation_frame*>(frame_ptr.get())
+              ->get_payload(),
+          dynamic_table);
+      return;
     case frame_type_registry::SETTINGS: {
       const auto sf_payload =
           dynamic_cast<const settings_frame*>(frame_ptr.get())->get_payload();
@@ -77,9 +80,6 @@ void update_dynamic_table(const h2_frame_ptr& frame_ptr,
     default:
       return;
   }
-
-  update_dynamic_table(header_block, dynamic_table);
-  return;
 }
 
 }  // namespace
@@ -107,10 +107,7 @@ class http2_client::impl {
 
 http2_client::impl::impl(const std::string& hostname, uint16_t port,
                          const ssl::verify_mode mode)
-: m_ssl_connection{
-hostname,
-port,
-mode} {}
+    : m_ssl_connection{hostname, port, mode} {}
 
 void http2_client::impl::send_raw_data(const uint8_t* data,
                                        const size_t length) {

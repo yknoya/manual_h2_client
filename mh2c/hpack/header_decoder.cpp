@@ -3,17 +3,17 @@
 // See accompanying file LICENSE
 #include "mh2c/hpack/header_decoder.h"
 
-#include <algorithm>
+#include <array>
+#include <iterator>
 #include <stdexcept>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "mh2c/common/byte_array.h"
 #include "mh2c/hpack/dynamic_table.h"
+#include "mh2c/hpack/header_decoder_internal.h"
 #include "mh2c/hpack/header_type.h"
 #include "mh2c/hpack/huffman_decoder.h"
-#include "mh2c/hpack/integer_representation.h"
 #include "mh2c/hpack/static_table_definition.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/cast.h"
@@ -27,10 +27,79 @@ using decoded_string_t = std::pair<std::string, size_t>;
 
 constexpr uint8_t HEADER_PREFIX_BITS{4u};
 
+using byte_iter_t = byte_array_t::const_iterator;
+
+template <uint8_t PrefixBits>
+decoded_int_t decode_prefixed_integer(byte_iter_t begin, byte_iter_t end) {
+  if (begin == end) {
+    throw std::invalid_argument("encoded integer is empty");
+  }
+
+  constexpr auto kPrefixMask = static_cast<uint8_t>((1u << PrefixBits) - 1u);
+  constexpr uint8_t kContinuationMask = 0x80u;
+  constexpr uint8_t kValueMask = 0x7fu;
+
+  auto decoded_value = static_cast<size_t>(*begin & kPrefixMask);
+  size_t decoded_byte_length{1u};
+  if (decoded_value < kPrefixMask) {
+    return {decoded_value, decoded_byte_length};
+  }
+
+  size_t shift_bit{};
+  for (auto iter = std::next(begin);; ++iter) {
+    if (iter == end) {
+      throw std::invalid_argument("truncated integer representation");
+    }
+
+    const auto next_byte = *iter;
+    decoded_value += static_cast<size_t>(next_byte & kValueMask) << shift_bit;
+    ++decoded_byte_length;
+    if ((next_byte & kContinuationMask) != kContinuationMask) {
+      break;
+    }
+
+    shift_bit += 7u;
+  }
+
+  return {decoded_value, decoded_byte_length};
+}
+
+decoded_string_t decode_string(byte_iter_t begin, byte_iter_t end,
+                               const char* label) {
+  if (begin == end) {
+    throw std::invalid_argument(std::string(label) + " is empty");
+  }
+
+  const auto [value_length, decoded_byte_length] =
+      decode_prefixed_integer<7u>(begin, end);
+  if (static_cast<size_t>(std::distance(begin, end)) <
+      decoded_byte_length + value_length) {
+    throw std::invalid_argument("truncated " + std::string(label));
+  }
+
+  const auto is_huffman_encode = extract_high_bit<1>(*begin);
+  const auto value_begin = std::next(begin, decoded_byte_length);
+  if (is_huffman_encode) {
+    byte_array_t huffman_encoded_data{value_begin,
+                                      std::next(value_begin, value_length)};
+    const auto decoded_data = huffman::decode(huffman_encoded_data);
+    return {{reinterpret_cast<const char*>(decoded_data.data()),
+             decoded_data.size()},
+            decoded_byte_length + value_length};
+  }
+
+  if (value_length == 0) {
+    return {"", decoded_byte_length};
+  }
+
+  return {{reinterpret_cast<const char*>(&*value_begin), value_length},
+          decoded_byte_length + value_length};
+}
+
 }  // namespace
 
 header_prefix_pattern check_prefix(const byte_array_t::value_type target) {
-  std::vector<header_prefix_pattern> prefixes{
+  constexpr std::array<header_prefix_pattern, 5u> prefixes{
       header_prefix_pattern::INDEXED,
       header_prefix_pattern::INCREMENTAL_INDEXING,
       header_prefix_pattern::SIZE_UPDATE,
@@ -50,122 +119,33 @@ header_prefix_pattern check_prefix(const byte_array_t::value_type target) {
   throw std::invalid_argument(msg);
 }
 
-decoded_int_t decode_index(const byte_array_t& encoded_index,
+decoded_int_t decode_index(byte_iter_t begin, byte_iter_t end,
                            const header_prefix_pattern prefix) {
-  decoded_int_t::first_type index{};
-  decoded_int_t::second_type decoded_byte_length{};
-
   switch (prefix) {
-    case header_prefix_pattern::INDEXED: {
-      constexpr auto bit_length{7u};
-      index = decode_integer_value<bit_length>(encoded_index);
-      // FIXME: how to get the number of decoded byte.
-      decoded_byte_length = encode_integer_value<bit_length>(index).size();
-      break;
-    }
-    case header_prefix_pattern::INCREMENTAL_INDEXING: {
-      constexpr auto bit_length{6u};
-      index = decode_integer_value<bit_length>(encoded_index);
-      decoded_byte_length = encode_integer_value<bit_length>(index).size();
-      break;
-    }
-    case header_prefix_pattern::WITHOUT_INDEXING: {
-      constexpr auto bit_length{4u};
-      index = decode_integer_value<bit_length>(encoded_index);
-      decoded_byte_length = encode_integer_value<bit_length>(index).size();
-      break;
-    }
-    case header_prefix_pattern::NEVER_INDEXED: {
-      constexpr auto bit_length{4u};
-      index = decode_integer_value<bit_length>(encoded_index);
-      decoded_byte_length = encode_integer_value<bit_length>(index).size();
-      break;
-    }
+    case header_prefix_pattern::INDEXED:
+      return decode_prefixed_integer<7u>(begin, end);
+    case header_prefix_pattern::INCREMENTAL_INDEXING:
+      return decode_prefixed_integer<6u>(begin, end);
+    case header_prefix_pattern::WITHOUT_INDEXING:
+    case header_prefix_pattern::NEVER_INDEXED:
+      return decode_prefixed_integer<4u>(begin, end);
     default:
       const auto msg =
           "prefix is invalid: " + std::to_string(underlying_cast(prefix));
       throw std::invalid_argument(msg);
-      break;
   }
-
-  return {index, decoded_byte_length};
 }
 
-decoded_int_t decode_max_size(const byte_array_t& encoded_max_size) {
-  constexpr auto bit_length{5u};
-  decoded_int_t::first_type max_size{
-      decode_integer_value<bit_length>(encoded_max_size)};
-  decoded_int_t::second_type decoded_byte_length =
-      encode_integer_value<bit_length>(max_size).size();
-  return {max_size, decoded_byte_length};
+decoded_int_t decode_max_size(byte_iter_t begin, byte_iter_t end) {
+  return decode_prefixed_integer<5u>(begin, end);
 }
 
-decoded_string_t decode_header_name(const byte_array_t& encoded_header_name) {
-  if (encoded_header_name.empty()) {
-    throw std::invalid_argument("header name is empty");
-  }
-
-  // decode length of header name
-  constexpr auto bit_length{7u};
-  const auto name_length =
-      decode_integer_value<bit_length>(encoded_header_name);
-  auto decoded_byte_length =
-      encode_integer_value<bit_length>(name_length).size();
-  if (encoded_header_name.size() < decoded_byte_length + name_length) {
-    throw std::invalid_argument("truncated header name");
-  }
-
-  // decode header name
-  const auto is_huffman_encode = extract_high_bit<1>(encoded_header_name[0]);
-  std::string header_name{};
-  if (is_huffman_encode) {
-    const auto begin = encoded_header_name.begin() + decoded_byte_length;
-    byte_array_t huffman_encoded_data{begin, begin + name_length};
-    const auto huffman_decoded_data = huffman::decode(huffman_encoded_data);
-    header_name = {reinterpret_cast<const char*>(&huffman_decoded_data[0]),
-                   huffman_decoded_data.size()};
-  } else {
-    header_name = {reinterpret_cast<const char*>(
-                       &encoded_header_name[decoded_byte_length]),
-                   name_length};
-  }
-  decoded_byte_length += name_length;
-
-  return {header_name, decoded_byte_length};
+decoded_string_t decode_header_name(byte_iter_t begin, byte_iter_t end) {
+  return decode_string(begin, end, "header name");
 }
 
-decoded_string_t decode_header_value(const byte_array_t& encoded_header_value) {
-  if (encoded_header_value.empty()) {
-    throw std::invalid_argument("header value is empty");
-  }
-
-  // decode length of header value
-  constexpr auto bit_length{7u};
-  const auto value_length =
-      decode_integer_value<bit_length>(encoded_header_value);
-  auto decoded_byte_length =
-      encode_integer_value<bit_length>(value_length).size();
-  if (encoded_header_value.size() < decoded_byte_length + value_length) {
-    throw std::invalid_argument("truncated header value");
-  }
-
-  // decode header name
-  const auto is_huffman_encode = extract_high_bit<1>(encoded_header_value[0]);
-  std::string header_value{};
-  if (is_huffman_encode) {
-    const auto begin = encoded_header_value.begin() + decoded_byte_length;
-    byte_array_t huffman_encoded_data{begin, begin + value_length};
-    const auto huffman_decoded_data = huffman::decode(huffman_encoded_data);
-    header_value = {reinterpret_cast<const char*>(&huffman_decoded_data[0]),
-                    huffman_decoded_data.size()};
-  } else {
-    header_value = {reinterpret_cast<const char*>(
-                        &encoded_header_value[decoded_byte_length]),
-                    value_length};
-  }
-  decoded_byte_length += value_length;
-
-  return {header_value, decoded_byte_length};
+decoded_string_t decode_header_value(byte_iter_t begin, byte_iter_t end) {
+  return decode_string(begin, end, "header value");
 }
 
 header_t make_indexed_header(const size_t index,
@@ -178,23 +158,19 @@ header_t make_indexed_header(const size_t index,
   return header;
 }
 
-decoded_header_t decode_header(const byte_array_t& encoded_header,
-                               const dynamic_table& dynamic_table) {
-  byte_array_t encoded_data{encoded_header};
-  if (encoded_data.empty()) {
+decoded_header_t decode_header_range(byte_iter_t begin, byte_iter_t end,
+                                     const dynamic_table& dynamic_table) {
+  if (begin == end) {
     throw std::invalid_argument("encoded header is empty");
   }
-  const auto prefix = check_prefix(encoded_data[0]);
+  const auto prefix = check_prefix(*begin);
 
-  // decode max size
   if (prefix == header_prefix_pattern::SIZE_UPDATE) {
-    const auto [max_size, decoded_length] = decode_max_size(encoded_data);
-    const header_block_entry entry{prefix, max_size};
-    return {entry, decoded_length};
+    const auto [max_size, decoded_byte_length] = decode_max_size(begin, end);
+    return {header_block_entry{prefix, max_size}, decoded_byte_length};
   }
 
-  // decode index
-  const auto [index, index_byte_length] = decode_index(encoded_data, prefix);
+  const auto [index, index_byte_length] = decode_index(begin, end, prefix);
   const auto indexed_header =
       (index > 0 ? header_block_entry{prefix,
                                       make_indexed_header(index, dynamic_table)}
@@ -203,33 +179,33 @@ decoded_header_t decode_header(const byte_array_t& encoded_header,
     return {indexed_header, index_byte_length};
   }
 
-  encoded_data.erase(encoded_data.begin(),
-                     encoded_data.begin() + index_byte_length);
   decoded_header_t::second_type decoded_byte_length = index_byte_length;
+  auto current = std::next(begin, index_byte_length);
 
-  // decode header name
   decoded_header_t::first_type header_entry{indexed_header};
   auto header = header_entry.get_header();
-  if (header.first.length() <= 0) {
+  if (header.first.empty()) {
     const auto [header_name, header_name_byte_length] =
-        decode_header_name(encoded_data);
-    encoded_data.erase(encoded_data.begin(),
-                       encoded_data.begin() + header_name_byte_length);
+        decode_header_name(current, end);
     decoded_byte_length += header_name_byte_length;
+    current += header_name_byte_length;
     header.first = header_name;
   }
 
-  // decode header name
   const auto [header_value, header_value_byte_length] =
-      decode_header_value(encoded_data);
-  encoded_data.erase(encoded_data.begin(),
-                     encoded_data.begin() + header_value_byte_length);
+      decode_header_value(current, end);
   decoded_byte_length += header_value_byte_length;
   header.second = header_value;
 
   header_entry.set_header(header);
 
   return {header_entry, decoded_byte_length};
+}
+
+decoded_header_t decode_header(const byte_array_t& encoded_header,
+                               const dynamic_table& dynamic_table) {
+  return decode_header_range(encoded_header.begin(), encoded_header.end(),
+                             dynamic_table);
 }
 
 }  // namespace mh2c

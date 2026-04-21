@@ -3,21 +3,15 @@
 // See accompanying file LICENSE
 #include "mh2c/frame/headers_frame.h"
 
-#include <algorithm>
-#include <iomanip>
-#include <iterator>
 #include <ostream>
 #include <string>
 
 #include "mh2c/common/byte_array.h"
 #include "mh2c/frame/frame_header.h"
 #include "mh2c/frame/frame_type_registry.h"
+#include "mh2c/frame/header_block_utils.h"
 #include "mh2c/hpack/dynamic_table.h"
-#include "mh2c/hpack/header_decoder.h"
-#include "mh2c/hpack/header_encoder.h"
 #include "mh2c/hpack/header_type.h"
-#include "mh2c/hpack/integer_representation.h"
-#include "mh2c/hpack/static_table_definition.h"
 #include "mh2c/util/bit_operation.h"
 #include "mh2c/util/byte_order.h"
 #include "mh2c/util/cast.h"
@@ -55,15 +49,8 @@ byte_array_t construct_encoded_payload(
     encoded_payload.push_back(priority_option.m_weight);
   }
 
-  // Header Block
-  std::for_each(
-      header_block.begin(), header_block.end(),
-      [&encoded_payload, mode, &dynamic_table](const auto& header_entry) {
-        const auto encoded_header =
-            encode_header(header_entry, mode, dynamic_table);
-        std::copy(encoded_header.begin(), encoded_header.end(),
-                  std::back_inserter(encoded_payload));
-      });
+  detail::append_encoded_header_block(&encoded_payload, header_block, mode,
+                                      dynamic_table);
 
   // Padding
   if (is_padded_set) {
@@ -90,63 +77,46 @@ struct decoded_payload_t {
 decoded_payload_t decode_payload(const frame_header& fh,
                                  const byte_array_t& raw_payload,
                                  const dynamic_table& dynamic_table) {
-  auto raw_data{raw_payload};
-  header_block_t header_block{};
+  auto payload_begin = raw_payload.begin();
+  auto payload_end = raw_payload.end();
 
-  // Extract padding if needed
   byte_array_t padding{};
   if (is_flag_set(fh.m_flags, hf_flag::PADDED)) {
-    if (raw_data.empty()) {
+    if (payload_begin == payload_end) {
       throw std::invalid_argument("missing pad length");
     }
 
-    const auto pad_length = raw_data.front();
-    if (raw_data.size() < 1u + pad_length) {
+    const auto pad_length = *payload_begin;
+    if (static_cast<size_t>(std::distance(payload_begin, payload_end)) <
+        1u + pad_length) {
       throw std::invalid_argument("invalid padded payload");
     }
-    const auto begin_padding = raw_data.end() - pad_length;
-    const auto end_padding = raw_data.end();
-    std::copy(begin_padding, end_padding, std::back_inserter(padding));
-
-    raw_data.erase(begin_padding, end_padding);
-    raw_data.erase(raw_data.begin());
+    ++payload_begin;
+    payload_end -= pad_length;
+    std::copy(payload_end, raw_payload.end(), std::back_inserter(padding));
   }
 
-  // Extract parameters for priority
   hf_priority_option priority_option{};
   if (is_flag_set(fh.m_flags, hf_flag::PRIORITY)) {
     constexpr auto kPriorityBytes = sizeof(fh_stream_id_t) + sizeof(uint8_t);
-    if (raw_data.size() < kPriorityBytes) {
+    if (static_cast<size_t>(std::distance(payload_begin, payload_end)) <
+        kPriorityBytes) {
       throw std::invalid_argument("invalid priority payload");
     }
 
-    // Exclusive and Stream Dependency
-    byte_array_t raw_stream_dependency{};
-    const auto begin_stream_dependency = raw_data.begin();
-    const auto end_stream_dependency =
-        raw_data.begin() + sizeof(fh_stream_id_t);
-    std::copy(begin_stream_dependency, end_stream_dependency,
-              std::back_inserter(raw_stream_dependency));
-
     priority_option.m_exclusive =
-        extract_high_bit<EXCLUSIVE_BITS>(raw_stream_dependency[0]);
+        extract_high_bit<EXCLUSIVE_BITS>(*payload_begin);
     priority_option.m_stream_dependency = extract_low_bit<STREAM_ID_BITS>(
         bytes2integral<decltype(priority_option.m_stream_dependency)>(
-            raw_stream_dependency.begin()));
-    raw_data.erase(begin_stream_dependency, end_stream_dependency);
+            payload_begin));
+    payload_begin += sizeof(fh_stream_id_t);
 
-    // Weight
-    priority_option.m_weight = raw_data.front();
-    raw_data.erase(raw_data.begin());
+    priority_option.m_weight = *payload_begin;
+    ++payload_begin;
   }
 
-  // Header Block
-  while (raw_data.size() > 0) {
-    const auto decoded_header = decode_header(raw_data, dynamic_table);
-    header_block.push_back(decoded_header.first);
-    raw_data.erase(raw_data.begin(), raw_data.begin() + decoded_header.second);
-  }
-
+  const auto header_block =
+      detail::decode_header_block(payload_begin, payload_end, dynamic_table);
   return {padding, priority_option, header_block};
 }
 
@@ -162,9 +132,8 @@ headers_frame::headers_frame(const fh_flags_t flags,
                              const dynamic_table& dynamic_table,
                              const byte_array_t& padding,
                              const hf_priority_option& priority_option)
-    : m_encoded_payload{construct_encoded_payload(flags, header_block, mode,
-dynamic_table, padding,
-priority_option)},
+    : m_encoded_payload{construct_encoded_payload(
+          flags, header_block, mode, dynamic_table, padding, priority_option)},
       m_header{construct_frame_header(flags, stream_id, m_encoded_payload)},
       m_padding{padding},
       m_priority_option{priority_option},
@@ -208,35 +177,12 @@ void headers_frame::dump(std::ostream& out_stream) const {
   out_stream << "  Weight: " << weight << '\n';
 
   out_stream << "  Header Block:\n";
-  std::for_each(
-      m_header_block.begin(), m_header_block.end(),
-      [&out_stream](const auto& header_entry) {
-        if (header_entry.get_prefix() == header_prefix_pattern::SIZE_UPDATE) {
-          out_stream << "    " << std::to_string(header_entry.get_max_size())
-                     << " (dynamic table size update)\n";
-          return;
-        }
-        const auto header = header_entry.get_header();
-        out_stream << "    " << header.first << ": " << header.second << '\n';
-      });
+  detail::dump_header_block(out_stream, m_header_block);
 
   out_stream << "  Padding:\n";
   const bool contain_padding = is_flag_set(m_header.m_flags, hf_flag::PADDED);
   if (contain_padding) {
-    uint32_t counter{0};
-    out_stream << "    ";
-    std::for_each(m_padding.begin(), m_padding.end(),
-                  [&out_stream, &counter](const auto& elem) {
-                    out_stream << std::hex << std::setw(2) << std::setfill('0')
-                               << static_cast<int>(elem);
-                    if (++counter % 8 == 0) {
-                      out_stream << '\n';
-                      out_stream << "    ";
-                    } else {
-                      out_stream << ' ';
-                    }
-                  });
-    out_stream << '\n';
+    detail::dump_hex_bytes(out_stream, m_padding);
   }
 
   return;
