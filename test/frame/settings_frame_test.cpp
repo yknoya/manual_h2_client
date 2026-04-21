@@ -5,6 +5,9 @@
 
 #include <gtest/gtest.h>
 
+#include <sstream>
+#include <string>
+
 #include "mh2c/common/byte_array.h"
 
 TEST(settings_frame_test, serialize) {
@@ -57,4 +60,35 @@ TEST(settings_frame_test, serialize_ack) {
 
   const auto serialized_sf = sf.serialize();
   EXPECT_EQ(expected_raw_sf, serialized_sf);
+}
+
+TEST(settings_frame_test, make_sf_payload_converts_enum_keys_to_ids) {
+  const auto payload = mh2c::make_sf_payload(
+      {{mh2c::sf_parameter::SETTINGS_ENABLE_PUSH, 0u},
+       {mh2c::sf_parameter::SETTINGS_MAX_FRAME_SIZE, 16384u}});
+
+  const mh2c::sf_payload_t expected{
+      {0x02u, 0u},
+      {0x05u, 16384u},
+  };
+
+  EXPECT_EQ(expected, payload);
+}
+
+TEST(settings_frame_test, dump_prints_known_and_unknown_setting_names) {
+  const mh2c::settings_frame sf{
+      0u,
+      0u,
+      {
+          {0x02u, 0u},
+          {0x07u, 42u},
+      },
+  };
+
+  std::ostringstream oss;
+  oss << sf;
+
+  const auto dumped = oss.str();
+  EXPECT_NE(std::string::npos, dumped.find("SETTINGS_ENABLE_PUSH: 0"));
+  EXPECT_NE(std::string::npos, dumped.find("UNKNOWN(7): 42"));
 }

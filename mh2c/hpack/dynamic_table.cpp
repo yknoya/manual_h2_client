@@ -32,11 +32,19 @@ dynamic_table::size_type resize_table(
 dynamic_table::dynamic_table() : dynamic_table{DEFAULT_TABLE_SIZE} {}
 
 dynamic_table::dynamic_table(const size_type initial_size)
-    : m_entries{}, m_table_size{0}, m_max_table_size{initial_size} {}
+    : m_entries{},
+m_table_size{0},
+m_max_table_size{initial_size} {}
 
 void dynamic_table::push(const_reference header) {
   const auto header_size =
       header.first.length() + header.second.length() + ENTRY_OVERHEAD_SIZE;
+  if (header_size > m_max_table_size) {
+    m_entries.clear();
+    m_table_size = 0;
+    return;
+  }
+
   m_table_size =
       resize_table(&m_entries, m_table_size + header_size, m_max_table_size);
   m_entries.insert(m_entries.begin(), header);

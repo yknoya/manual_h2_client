@@ -40,17 +40,20 @@ target_sources(mh2c_test
     frame/ping_frame_test.cpp
     frame/priority_frame_test.cpp
     frame/push_promise_frame_test.cpp
+    frame/raw_frame_test.cpp
     frame/rst_stream_frame_test.cpp
     frame/settings_frame_test.cpp
     frame/window_update_frame_test.cpp
     hpack/dynamic_table_test.cpp
     hpack/header_decoder_test.cpp
     hpack/header_encoder_test.cpp
+    hpack/header_type_test.cpp
     hpack/huffman_decoder_test.cpp
     hpack/huffman_encoder_test.cpp
     hpack/integer_representation_test.cpp
     hpack/static_table_definition_test.cpp
     util/bit_operation_test.cpp
+    util/cast_test.cpp
     util/byte_order_test.cpp
 )
 

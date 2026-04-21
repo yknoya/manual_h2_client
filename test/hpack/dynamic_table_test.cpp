@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include <stdexcept>
 #include <string>
 
 #include "mh2c/hpack/header_type.h"
@@ -92,4 +93,36 @@ TEST(dynamic_table, update_table_size) {
   EXPECT_EQ(updated_entries, table.get_entries());
   EXPECT_EQ(updated_table_size, table.get_table_size());
   EXPECT_EQ(updated_table_size, table.get_max_table_size());
+}
+
+TEST(dynamic_table, push_oversized_header_clears_table_without_inserting) {
+  const mh2c::header_t authority_header{":authority", "example.com"};
+  const auto max_table_size = calculate_header_size(authority_header) - 1;
+
+  mh2c::dynamic_table table{max_table_size};
+  table.push(authority_header);
+
+  EXPECT_TRUE(table.get_entries().empty());
+  EXPECT_EQ(0u, table.get_table_size());
+  EXPECT_EQ(max_table_size, table.get_max_table_size());
+}
+
+TEST(dynamic_table, update_table_size_to_zero_evicts_all_entries) {
+  const mh2c::header_t authority_header{":authority", "example.com"};
+  const mh2c::header_t content_type_header{"content-type", "application/json"};
+
+  mh2c::dynamic_table table{};
+  table.push(authority_header);
+  table.push(content_type_header);
+  table.update_table_size(0u);
+
+  EXPECT_TRUE(table.get_entries().empty());
+  EXPECT_EQ(0u, table.get_table_size());
+  EXPECT_EQ(0u, table.get_max_table_size());
+}
+
+TEST(dynamic_table, at_throws_when_position_is_out_of_range) {
+  mh2c::dynamic_table table{};
+
+  EXPECT_THROW(table.at(0), std::out_of_range);
 }
