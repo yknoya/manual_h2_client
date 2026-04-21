@@ -54,4 +54,9 @@ You can execute the sample code in the following command after building with
 `-DMH2C_BUILD_SAMPLE=ON`.
 ```
 $ ./build/sample/h2_get/sample_h2_get
+$ ./build/sample/h2_post/sample_h2_post
+$ ./build/sample/h2_post_chunked_data/sample_h2_post_chunked_data
+$ ./build/sample/h2_custom_headers/sample_h2_custom_headers
+$ ./build/sample/h2_ping/sample_h2_ping
+$ ./build/sample/h2_window_update/sample_h2_window_update
 ```
