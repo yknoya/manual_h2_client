@@ -1,5 +1,12 @@
 # Repository Guidelines
 
+## Project Intent
+This repository is not only an RFC-compliant HTTP/2 library. It is also a
+manual HTTP/2 client for reproducing real-world and intentionally misbehaving
+client behavior when debugging servers. Preserve the ability to build, send,
+parse, and inspect unusual or malformed frames when that supports the manual
+client use case.
+
 ## Project Structure & Module Organization
 Core library sources live under `mh2c/`. The main areas are `frame/` for HTTP/2 frame types and parsing, `hpack/` for header compression, `ssl/` for OpenSSL wrappers, `util/` for low-level helpers, and `common/` for shared types. Public headers are exposed from `mh2c/` and selected subdirectories during install. Unit tests mirror the library layout under `test/` (for example `test/frame/*` and `test/hpack/*`). Sample usage lives in `sample/h2_get/`. Treat `build/` as generated output; do not hand-edit or commit it unless the task explicitly requires generated files.
 
@@ -32,6 +39,10 @@ Use C++17. Formatting is enforced by `.clang-format`: 2-space indentation, no ta
 
 ## Testing Guidelines
 Add or update tests in the matching `test/<area>/` directory when behavior changes. Follow the existing file pattern `*_test.cpp` and keep coverage close to the touched module. New frame, HPACK, or utility behavior should ship with a focused unit test before broader sample changes.
+Do not assume stricter RFC rejection is automatically correct. When behavior is
+intentionally permissive for the manual client, prefer tests that catch unsafe
+failure modes such as crashes, overreads, silent normalization, or raw payload
+loss instead of forcing rejection of every malformed input.
 
 ## Commit & Pull Request Guidelines
 Recent history uses short Conventional Commit-style subjects such as `fix: ...` and `chore: ...`, with occasional `[WIP]` prefixes for in-progress work. Keep commits small and behavior-focused. Pull requests should explain the change, note any OpenSSL or build assumptions, link related issues, and include the commands you ran (`cmake --build build`, `ctest`, `format`, `lint`). Include sample output only when it clarifies a protocol or API change.
