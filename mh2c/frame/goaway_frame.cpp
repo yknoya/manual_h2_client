@@ -79,7 +79,8 @@ goaway_frame::goaway_frame(const goaway_payload& payload)
 
 goaway_frame::goaway_frame(const frame_header& fh,
                            const byte_array_t& raw_payload)
-    : m_header{fh}, m_payload{construct_payload(raw_payload)} {}
+    : m_header{fh},
+      m_payload{construct_payload(raw_payload)} {}
 
 frame_header goaway_frame::get_header() const { return m_header; }
 

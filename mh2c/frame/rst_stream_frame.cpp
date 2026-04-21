@@ -42,11 +42,13 @@ error_codes construct_error_code(const byte_array_t& raw_payload) {
 
 rst_stream_frame::rst_stream_frame(const fh_stream_id_t stream_id,
                                    const error_codes error_code)
-    : m_header{construct_frame_header(stream_id)}, m_error_code{error_code} {}
+    : m_header{construct_frame_header(stream_id)},
+      m_error_code{error_code} {}
 
 rst_stream_frame::rst_stream_frame(const frame_header& fh,
                                    const byte_array_t& raw_payload)
-    : m_header{fh}, m_error_code{construct_error_code(raw_payload)} {}
+    : m_header{fh},
+      m_error_code{construct_error_code(raw_payload)} {}
 
 frame_header rst_stream_frame::get_header() const { return m_header; }
 

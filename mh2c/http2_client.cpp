@@ -107,7 +107,10 @@ class http2_client::impl {
 
 http2_client::impl::impl(const std::string& hostname, uint16_t port,
                          const ssl::verify_mode mode)
-    : m_ssl_connection{hostname, port, mode} {}
+: m_ssl_connection{
+hostname,
+port,
+mode} {}
 
 void http2_client::impl::send_raw_data(const uint8_t* data,
                                        const size_t length) {

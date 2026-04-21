@@ -34,13 +34,13 @@ using pad_length_t = uint8_t;
 
 data_frame::data_frame(const fh_flags_t flags, const fh_stream_id_t stream_id,
                        const byte_array_t& payload)
-    : m_header(construct_frame_header(flags, stream_id, payload)),
-      m_payload(payload) {}
+    : m_header{construct_frame_header(flags, stream_id, payload)},
+      m_payload{payload} {}
 
 data_frame::data_frame(const fh_flags_t flags, const fh_stream_id_t stream_id,
                        const std::string& payload)
-    : m_header(construct_frame_header(flags, stream_id, payload)),
-      m_payload(payload.begin(), payload.end()) {}
+    : m_header{construct_frame_header(flags, stream_id, payload)},
+      m_payload{payload.begin(), payload.end()} {}
 
 frame_header data_frame::get_header() const { return m_header; }
 

@@ -45,10 +45,12 @@ byte_array_t construct_opaque_data(const byte_array_t& opaque_data) {
 
 ping_frame::ping_frame(const fh_flags_t flags, const byte_array_t& opaque_data)
     : m_header{construct_frame_header(flags)},
-      m_opaque_data{construct_opaque_data(opaque_data)} {}
+m_opaque_data{
+construct_opaque_data(opaque_data)} {}
 
 ping_frame::ping_frame(const frame_header& fh, const byte_array_t& raw_payload)
-    : m_header{fh}, m_opaque_data{raw_payload} {}
+    : m_header{fh},
+m_opaque_data{raw_payload} {}
 
 frame_header ping_frame::get_header() const { return m_header; }
 

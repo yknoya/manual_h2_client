@@ -21,8 +21,9 @@ using encode_table_value = std::pair<encoded_value_t, encoded_length_t>;
 using encode_table_t = std::map<encode_target, encode_table_value>;
 
 using decoded_value_t = encode_target;
-using decode_table_record_t =
-    std::pair<encoded_length_t, std::map<encoded_value_t, decoded_value_t>>;
+using decode_table_record_t = std::pair<encoded_length_t,
+std::map<encoded_value_t,
+decoded_value_t>>;
 using decode_table_t = std::vector<decode_table_record_t>;
 
 extern const encode_table_t encode_table;

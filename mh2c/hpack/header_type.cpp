@@ -26,15 +26,18 @@ header_block_entry correct_prefix(const header_block_entry& header_entry) {
 }  // namespace
 
 header_block_entry::header_block_entry(const header_t& header)
-    : header_block_entry{header_prefix_pattern::NEVER_INDEXED, header} {}
+    : header_block_entry{
+header_prefix_pattern::NEVER_INDEXED, header} {}
 
 header_block_entry::header_block_entry(const header_prefix_pattern prefix,
                                        const header_t& header)
-    : m_prefix{prefix}, m_entry{header} {}
+    : m_prefix{prefix},
+      m_entry{header} {}
 
 header_block_entry::header_block_entry(const header_prefix_pattern prefix,
                                        const size_t max_size)
-    : m_prefix{prefix}, m_entry{max_size} {}
+    : m_prefix{prefix},
+      m_entry{max_size} {}
 
 header_prefix_pattern header_block_entry::get_prefix() const {
   return m_prefix;

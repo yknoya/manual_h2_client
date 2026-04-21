@@ -17,7 +17,8 @@
 namespace mh2c {
 
 raw_frame::raw_frame(const frame_header& header, const byte_array_t& payload)
-    : m_header{header}, m_payload{payload} {}
+    : m_header{header},
+m_payload{payload} {}
 
 byte_array_t raw_frame::serialize() const {
   byte_array_t serialzed_sf = mh2c::serialize(m_header);

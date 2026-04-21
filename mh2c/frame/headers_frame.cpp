@@ -150,8 +150,9 @@ headers_frame::headers_frame(const fh_flags_t flags,
                              const dynamic_table& dynamic_table,
                              const byte_array_t& padding,
                              const hf_priority_option& priority_option)
-    : m_encoded_payload{construct_encoded_payload(
-          flags, header_block, mode, dynamic_table, padding, priority_option)},
+    : m_encoded_payload{construct_encoded_payload(flags, header_block, mode,
+dynamic_table, padding,
+priority_option)},
       m_header{construct_frame_header(flags, stream_id, m_encoded_payload)},
       m_padding{padding},
       m_priority_option{priority_option},

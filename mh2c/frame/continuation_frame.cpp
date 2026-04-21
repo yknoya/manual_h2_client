@@ -73,9 +73,10 @@ continuation_frame::continuation_frame(const fh_flags_t flags,
                                        const header_block_t& header_block,
                                        const header_encode_mode mode,
                                        const dynamic_table& dynamic_table)
-    : m_encoded_payload{construct_encoded_payload(header_block, mode,
-                                                  dynamic_table)},
-      m_header{construct_frame_header(flags, stream_id, m_encoded_payload)},
+    : m_encoded_payload{
+construct_encoded_payload(header_block, mode, dynamic_table)},
+      m_header{
+construct_frame_header(flags, stream_id, m_encoded_payload)},
       m_header_block{header_block} {}
 
 continuation_frame::continuation_frame(const frame_header& fh,

@@ -127,10 +127,10 @@ push_promise_frame::push_promise_frame(const fh_flags_t flags,
                                        const push_promise_payload& payload,
                                        const header_encode_mode mode,
                                        const dynamic_table& dynamic_table)
-    : m_encoded_payload{construct_encoded_payload(flags, payload, mode,
-                                                  dynamic_table)},
-      m_header{
-          construct_frame_header(flags, stream_id, m_encoded_payload.size())},
+    : m_encoded_payload{
+construct_encoded_payload(flags, payload, mode, dynamic_table)},
+      m_header{construct_frame_header(flags, stream_id,
+m_encoded_payload.size())},
       m_payload{payload} {}
 
 push_promise_frame::push_promise_frame(const frame_header& fh,
