@@ -96,7 +96,14 @@ decoded_payload_t decode_payload(const frame_header& fh,
   // Extract padding if needed
   byte_array_t padding{};
   if (is_flag_set(fh.m_flags, hf_flag::PADDED)) {
+    if (raw_data.empty()) {
+      throw std::invalid_argument("missing pad length");
+    }
+
     const auto pad_length = raw_data.front();
+    if (raw_data.size() < 1u + pad_length) {
+      throw std::invalid_argument("invalid padded payload");
+    }
     const auto begin_padding = raw_data.end() - pad_length;
     const auto end_padding = raw_data.end();
     std::copy(begin_padding, end_padding, std::back_inserter(padding));
@@ -108,6 +115,11 @@ decoded_payload_t decode_payload(const frame_header& fh,
   // Extract parameters for priority
   hf_priority_option priority_option{};
   if (is_flag_set(fh.m_flags, hf_flag::PRIORITY)) {
+    constexpr auto kPriorityBytes = sizeof(fh_stream_id_t) + sizeof(uint8_t);
+    if (raw_data.size() < kPriorityBytes) {
+      throw std::invalid_argument("invalid priority payload");
+    }
+
     // Exclusive and Stream Dependency
     byte_array_t raw_stream_dependency{};
     const auto begin_stream_dependency = raw_data.begin();

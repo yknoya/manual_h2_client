@@ -86,7 +86,13 @@ h2_frame_ptr build_priority_frame(const frame_header& fh,
 h2_frame_ptr build_push_promise_frame(const frame_header& fh,
                                       const byte_array_t& raw_payload,
                                       const dynamic_table& dynamic_table) {
-  return std::make_unique<push_promise_frame>(fh, raw_payload, dynamic_table);
+  try {
+    return std::make_unique<push_promise_frame>(fh, raw_payload, dynamic_table);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return build_raw_frame(fh, raw_payload, dynamic_table);
 }
 
 h2_frame_ptr build_rst_stream_frame(const frame_header& fh,
@@ -98,16 +104,37 @@ h2_frame_ptr build_rst_stream_frame(const frame_header& fh,
 h2_frame_ptr build_settings_frame(const frame_header& fh,
                                   const byte_array_t& raw_payload,
                                   const dynamic_table&) {
-  sf_payload_t payload;
-  for (auto ite = raw_payload.begin(); ite != raw_payload.end();) {
-    auto id = bytes2integral<sf_id_t>(ite);
-    ite += sizeof(id);
-    auto value = bytes2integral<sf_value_t>(ite);
-    ite += sizeof(value);
-    payload.insert(make_sf_parameter(id, value));
+  try {
+    constexpr auto kSettingBytes = sizeof(sf_id_t) + sizeof(sf_value_t);
+    if (raw_payload.size() % kSettingBytes != 0) {
+      const auto msg =
+          "invalid settings payload size: " +
+          std::to_string(raw_payload.size());
+      throw std::invalid_argument(msg);
+    }
+
+    sf_payload_t payload;
+    for (auto ite = raw_payload.begin(); ite != raw_payload.end();) {
+      auto id = bytes2integral<sf_id_t>(ite);
+      ite += sizeof(id);
+      auto value = bytes2integral<sf_value_t>(ite);
+      ite += sizeof(value);
+      const auto [iter, inserted] =
+          payload.insert(make_sf_parameter(id, value));
+      if (!inserted) {
+        const auto msg =
+            "duplicated settings parameter: " + std::to_string(iter->first);
+        throw std::invalid_argument(msg);
+      }
+    }
+
+    return std::make_unique<settings_frame>(fh.m_flags, fh.m_stream_id,
+                                            payload);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
   }
 
-  return std::make_unique<settings_frame>(fh.m_flags, fh.m_stream_id, payload);
+  return build_raw_frame(fh, raw_payload, dynamic_table{});
 }
 
 h2_frame_ptr build_window_update_frame(const frame_header& fh,

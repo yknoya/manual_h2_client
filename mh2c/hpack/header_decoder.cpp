@@ -101,12 +101,19 @@ decoded_int_t decode_max_size(const byte_array_t& encoded_max_size) {
 }
 
 decoded_string_t decode_header_name(const byte_array_t& encoded_header_name) {
+  if (encoded_header_name.empty()) {
+    throw std::invalid_argument("header name is empty");
+  }
+
   // decode length of header name
   constexpr auto bit_length{7u};
   const auto name_length =
       decode_integer_value<bit_length>(encoded_header_name);
   auto decoded_byte_length =
       encode_integer_value<bit_length>(name_length).size();
+  if (encoded_header_name.size() < decoded_byte_length + name_length) {
+    throw std::invalid_argument("truncated header name");
+  }
 
   // decode header name
   const auto is_huffman_encode = extract_high_bit<1>(encoded_header_name[0]);
@@ -128,12 +135,19 @@ decoded_string_t decode_header_name(const byte_array_t& encoded_header_name) {
 }
 
 decoded_string_t decode_header_value(const byte_array_t& encoded_header_value) {
+  if (encoded_header_value.empty()) {
+    throw std::invalid_argument("header value is empty");
+  }
+
   // decode length of header value
   constexpr auto bit_length{7u};
   const auto value_length =
       decode_integer_value<bit_length>(encoded_header_value);
   auto decoded_byte_length =
       encode_integer_value<bit_length>(value_length).size();
+  if (encoded_header_value.size() < decoded_byte_length + value_length) {
+    throw std::invalid_argument("truncated header value");
+  }
 
   // decode header name
   const auto is_huffman_encode = extract_high_bit<1>(encoded_header_value[0]);
@@ -167,6 +181,9 @@ header_t make_indexed_header(const size_t index,
 decoded_header_t decode_header(const byte_array_t& encoded_header,
                                const dynamic_table& dynamic_table) {
   byte_array_t encoded_data{encoded_header};
+  if (encoded_data.empty()) {
+    throw std::invalid_argument("encoded header is empty");
+  }
   const auto prefix = check_prefix(encoded_data[0]);
 
   // decode max size

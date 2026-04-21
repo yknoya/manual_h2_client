@@ -50,3 +50,9 @@ TEST(huffman_decoder, simple_data_url) {
   const auto decoded_data = mh2c::huffman::decode(encoded_data);
   EXPECT_EQ(expected_data, decoded_data);
 }
+
+TEST(huffman_decoder, throw_if_encoded_data_is_too_short) {
+  const mh2c::byte_array_t encoded_data{0xff};
+
+  EXPECT_THROW(mh2c::huffman::decode(encoded_data), std::invalid_argument);
+}

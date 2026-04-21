@@ -81,7 +81,14 @@ push_promise_payload decode_payload(const frame_header& fh,
   // Extract Padding if needed
   byte_array_t padding{};
   if (is_flag_set(fh.m_flags, ppf_flag::PADDED)) {
+    if (raw_data.empty()) {
+      throw std::invalid_argument("missing pad length");
+    }
+
     const auto pad_length = raw_data.front();
+    if (raw_data.size() < 1u + pad_length) {
+      throw std::invalid_argument("invalid padded payload");
+    }
     const auto begin_padding = raw_data.end() - pad_length;
     const auto end_padding = raw_data.end();
     std::copy(begin_padding, end_padding, std::back_inserter(padding));
@@ -91,6 +98,9 @@ push_promise_payload decode_payload(const frame_header& fh,
   }
 
   // Extract Reserved and Promised Stream ID
+  if (raw_data.size() < sizeof(fh_stream_id_t)) {
+    throw std::invalid_argument("invalid promised stream id payload");
+  }
   const reserved_t reserved = extract_high_bit<RESERVED_BITS>(raw_data[0]);
   const auto promised_stream_id = extract_low_bit<STREAM_ID_BITS>(
       bytes2integral<fh_stream_id_t>(raw_data.begin()));
