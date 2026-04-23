@@ -44,7 +44,13 @@ h2_frame_ptr build_raw_frame(const frame_header& fh,
 h2_frame_ptr build_continuation_frame(const frame_header& fh,
                                       const byte_array_t& raw_payload,
                                       const dynamic_table& dynamic_table) {
-  return std::make_unique<continuation_frame>(fh, raw_payload, dynamic_table);
+  try {
+    return std::make_unique<continuation_frame>(fh, raw_payload, dynamic_table);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return build_raw_frame(fh, raw_payload, dynamic_table);
 }
 
 h2_frame_ptr build_data_frame(const frame_header& fh,
@@ -119,9 +125,8 @@ h2_frame_ptr build_settings_frame(const frame_header& fh,
   try {
     constexpr auto kSettingBytes = sizeof(sf_id_t) + sizeof(sf_value_t);
     if (raw_payload.size() % kSettingBytes != 0) {
-      const auto msg =
-          "invalid settings payload size: " +
-          std::to_string(raw_payload.size());
+      const auto msg = "invalid settings payload size: " +
+                       std::to_string(raw_payload.size());
       throw std::invalid_argument(msg);
     }
 

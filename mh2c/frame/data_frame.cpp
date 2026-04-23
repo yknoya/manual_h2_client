@@ -70,16 +70,15 @@ void data_frame::dump(std::ostream& out_stream) const {
           ? payload_size - header_bytes - pad_length
           : 0u;
   const auto data_begin =
-      m_payload.begin() + static_cast<byte_array_t::difference_type>(
-                              header_bytes);
-  const auto data_end =
-      data_begin +
-      static_cast<byte_array_t::difference_type>(available_data_bytes);
+      m_payload.begin() +
+      static_cast<byte_array_t::difference_type>(header_bytes);
+  const auto data_end = data_begin + static_cast<byte_array_t::difference_type>(
+                                         available_data_bytes);
   const std::string_view data =
       available_data_bytes > 0u
-          ? std::string_view{
-                reinterpret_cast<const char*>(m_payload.data() + header_bytes),
-                available_data_bytes}
+          ? std::string_view{reinterpret_cast<const char*>(m_payload.data() +
+                                                           header_bytes),
+                             available_data_bytes}
           : std::string_view{};
 
   out_stream << "  Pad Length: " << std::to_string(pad_length) << '\n';

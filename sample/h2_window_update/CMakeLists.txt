@@ -3,6 +3,7 @@ add_executable(sample_h2_window_update "")
 
 target_sources(sample_h2_window_update
   PRIVATE
+    ../common/sample_common.cpp
     sample_h2_window_update.cpp
 )
 

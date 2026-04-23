@@ -66,7 +66,7 @@ template <typename T>
 inline sf_pair_t make_sf_parameter(T id, const sf_value_t value);
 
 using sf_parameters =
-std::initializer_list<std::pair<sf_parameter, sf_value_t>>;
+    std::initializer_list<std::pair<sf_parameter, sf_value_t>>;
 sf_payload_t make_sf_payload(const sf_parameters& parameters);
 
 }  // namespace mh2c

@@ -59,11 +59,7 @@ TEST(window_update_frame_test, throw_if_window_size_is_over) {
 
 TEST(window_update_frame_test, parse_raw_payload_with_reserved_bit) {
   const mh2c::frame_header header{
-      4u,
-      0x08u,
-      0u,
-      0u,
-      3u,
+      4u, 0x08u, 0u, 0u, 3u,
   };
   const mh2c::byte_array_t raw_payload{0x81, 0x23, 0x45, 0x67};
   const mh2c::window_update_frame frame{header, raw_payload};
@@ -77,11 +73,7 @@ TEST(window_update_frame_test, parse_raw_payload_with_reserved_bit) {
 
 TEST(window_update_frame_test, throw_if_payload_size_is_zero) {
   const mh2c::frame_header header{
-      0u,
-      0x08u,
-      0u,
-      0u,
-      0u,
+      0u, 0x08u, 0u, 0u, 0u,
   };
 
   EXPECT_ANY_THROW(mh2c::window_update_frame(header, {}));
@@ -89,24 +81,15 @@ TEST(window_update_frame_test, throw_if_payload_size_is_zero) {
 
 TEST(window_update_frame_test, throw_if_payload_size_is_three) {
   const mh2c::frame_header header{
-      3u,
-      0x08u,
-      0u,
-      0u,
-      0u,
+      3u, 0x08u, 0u, 0u, 0u,
   };
 
-  EXPECT_ANY_THROW(
-      mh2c::window_update_frame(header, {0x01, 0x23, 0x45}));
+  EXPECT_ANY_THROW(mh2c::window_update_frame(header, {0x01, 0x23, 0x45}));
 }
 
 TEST(window_update_frame_test, throw_if_payload_size_is_five) {
   const mh2c::frame_header header{
-      5u,
-      0x08u,
-      0u,
-      0u,
-      0u,
+      5u, 0x08u, 0u, 0u, 0u,
   };
 
   EXPECT_ANY_THROW(

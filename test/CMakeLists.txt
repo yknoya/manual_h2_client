@@ -31,6 +31,7 @@ endif()
 
 target_sources(mh2c_test
   PRIVATE
+    http2_client_internal_test.cpp
     frame/continuation_frame_test.cpp
     frame/data_frame_test.cpp
     frame/frame_builder_test.cpp

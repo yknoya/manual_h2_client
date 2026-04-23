@@ -3,9 +3,9 @@
 // See accompanying file LICENSE
 #include "mh2c/frame/data_frame.h"
 
-#include <sstream>
-
 #include <gtest/gtest.h>
+
+#include <sstream>
 
 #include "mh2c/common/byte_array.h"
 #include "mh2c/frame/frame_header.h"

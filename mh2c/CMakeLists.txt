@@ -114,6 +114,7 @@ set(mh2c_private_headers
   "hpack/huffman_decoder.h"
   "hpack/huffman_encoder.h"
   "hpack/integer_representation.h"
+  "http2_client_internal.h"
   "hpack/static_table_definition.h"
   "ssl/ssl_bio.h"
   "ssl/ssl_connection.h"

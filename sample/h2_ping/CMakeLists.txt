@@ -3,6 +3,7 @@ add_executable(sample_h2_ping "")
 
 target_sources(sample_h2_ping
   PRIVATE
+    ../common/sample_common.cpp
     sample_h2_ping.cpp
 )
 

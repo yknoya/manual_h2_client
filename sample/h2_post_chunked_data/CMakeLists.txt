@@ -3,6 +3,7 @@ add_executable(sample_h2_post_chunked_data "")
 
 target_sources(sample_h2_post_chunked_data
   PRIVATE
+    ../common/sample_common.cpp
     sample_h2_post_chunked_data.cpp
 )
 

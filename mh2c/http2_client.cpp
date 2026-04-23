@@ -20,13 +20,14 @@
 #include "mh2c/frame/settings_frame.h"
 #include "mh2c/hpack/dynamic_table.h"
 #include "mh2c/hpack/header_type.h"
+#include "mh2c/http2_client_internal.h"
 #include "mh2c/ssl/ssl_connection.h"
 #include "mh2c/util/byte_order.h"
 #include "mh2c/util/cast.h"
 
 namespace mh2c {
 
-namespace {
+namespace detail {
 
 void update_dynamic_table(const header_block_t& header_block,
                           dynamic_table* dynamic_table) {
@@ -82,7 +83,7 @@ void update_dynamic_table(const h2_frame_ptr& frame_ptr,
   }
 }
 
-}  // namespace
+}  // namespace detail
 
 class http2_client::impl {
  public:
@@ -140,14 +141,14 @@ h2_frame_ptr http2_client::impl::receive_frame() {
   }
 
   auto frame_ptr = build_frame(fh, raw_payload, m_response_dynamic_table);
-  update_dynamic_table(frame_ptr, &m_response_dynamic_table);
+  detail::update_dynamic_table(frame_ptr, &m_response_dynamic_table);
 
   return frame_ptr;
 }
 
 void http2_client::impl::update_request_dynamic_table(
     const header_block_t& header_block) {
-  update_dynamic_table(header_block, &m_request_dynamic_table);
+  detail::update_dynamic_table(header_block, &m_request_dynamic_table);
   return;
 }
 

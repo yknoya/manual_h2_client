@@ -28,11 +28,7 @@ Format sources with:
 ```sh
 cmake --build build --target format
 ```
-Run lint checks with:
-```sh
-cmake --build build --target lint
-```
-`format` requires `clang-format`; `lint` requires `cpplint`; tests require GoogleTest.
+`format` requires `clang-format`; tests require GoogleTest.
 
 ## Coding Style & Naming Conventions
 Use C++17. Formatting is enforced by `.clang-format`: 2-space indentation, no tabs, 80-column limit, attached braces, and Google-style include sorting. Prefer matching the existing naming scheme: lowercase file names with underscores (`frame_builder.cpp`), class/type names in PascalCase, and test files ending in `_test.cpp`. Keep headers and implementations paired (`foo.h`, `foo.cpp`, optional `foo.ipp`).
@@ -45,4 +41,4 @@ failure modes such as crashes, overreads, silent normalization, or raw payload
 loss instead of forcing rejection of every malformed input.
 
 ## Commit & Pull Request Guidelines
-Recent history uses short Conventional Commit-style subjects such as `fix: ...` and `chore: ...`, with occasional `[WIP]` prefixes for in-progress work. Keep commits small and behavior-focused. Pull requests should explain the change, note any OpenSSL or build assumptions, link related issues, and include the commands you ran (`cmake --build build`, `ctest`, `format`, `lint`). Include sample output only when it clarifies a protocol or API change.
+Recent history uses short Conventional Commit-style subjects such as `fix: ...` and `chore: ...`, with occasional `[WIP]` prefixes for in-progress work. Keep commits small and behavior-focused. Pull requests should explain the change, note any OpenSSL or build assumptions, link related issues, and include the commands you ran (`cmake --build build`, `ctest`, `format`). Include sample output only when it clarifies a protocol or API change.

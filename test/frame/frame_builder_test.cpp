@@ -135,6 +135,24 @@ TEST(frame_builder_test, continuation_frame_incremental_indexing) {
   EXPECT_EQ(expected_cf, *dynamic_cast<mh2c::continuation_frame*>(frame.get()));
 }
 
+TEST(frame_builder_test,
+     continuation_frame_invalid_payload_falls_back_to_raw_frame) {
+  const mh2c::frame_header fh{
+      1u, mh2c::underlying_cast(mh2c::frame_type_registry::CONTINUATION),
+      0u, 0u,
+      1u,
+  };
+  const mh2c::byte_array_t raw_payload{0xbe};
+  mh2c::dynamic_table dynamic_table{};
+
+  const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
+
+  const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
+  ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(fh, raw->get_header());
+  EXPECT_EQ(raw_payload, raw->get_payload());
+}
+
 // Build DATA FRAME
 TEST(frame_builder_test, data_frame_no_flags) {
   const mh2c::fh_flags_t flags{0u};
@@ -367,11 +385,7 @@ TEST(frame_builder_test, headers_frame_with_padding) {
 TEST(frame_builder_test,
      headers_frame_invalid_payload_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      1u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::HEADERS),
-      0u,
-      0u,
-      1u,
+      1u, mh2c::underlying_cast(mh2c::frame_type_registry::HEADERS), 0u, 0u, 1u,
   };
   const mh2c::byte_array_t raw_payload{0xbe};
   mh2c::dynamic_table dynamic_table{};
@@ -672,13 +686,30 @@ TEST(frame_builder_test, push_promise_frame_with_padding) {
 TEST(frame_builder_test,
      push_promise_frame_truncated_payload_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      3u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::PUSH_PROMISE),
-      0u,
-      0u,
+      3u, mh2c::underlying_cast(mh2c::frame_type_registry::PUSH_PROMISE),
+      0u, 0u,
       1u,
   };
   const mh2c::byte_array_t raw_payload{0x00, 0x00, 0x00};
+  mh2c::dynamic_table dynamic_table{};
+
+  const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
+
+  const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
+  ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(raw_payload, raw->get_payload());
+}
+
+TEST(frame_builder_test,
+     push_promise_frame_invalid_padding_falls_back_to_raw_frame) {
+  const mh2c::frame_header fh{
+      2u,
+      mh2c::underlying_cast(mh2c::frame_type_registry::PUSH_PROMISE),
+      mh2c::make_frame_header_flags(mh2c::ppf_flag::PADDED),
+      0u,
+      1u,
+  };
+  const mh2c::byte_array_t raw_payload{0x04, 0xbe};
   mh2c::dynamic_table dynamic_table{};
 
   const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
@@ -764,10 +795,7 @@ TEST(frame_builder_test, settings_frame_ack) {
 TEST(frame_builder_test,
      settings_frame_invalid_length_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      5u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::SETTINGS),
-      0u,
-      0u,
+      5u, mh2c::underlying_cast(mh2c::frame_type_registry::SETTINGS), 0u, 0u,
       0u,
   };
   const mh2c::byte_array_t raw_payload{0x00, 0x01, 0x00, 0x00, 0x02};
@@ -783,15 +811,11 @@ TEST(frame_builder_test,
 TEST(frame_builder_test,
      settings_frame_duplicate_parameter_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      12u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::SETTINGS),
-      0u,
-      0u,
+      12u, mh2c::underlying_cast(mh2c::frame_type_registry::SETTINGS), 0u, 0u,
       0u,
   };
   const mh2c::byte_array_t raw_payload{
-      0x00, 0x01, 0x00, 0x00, 0x02, 0x00,
-      0x00, 0x01, 0x00, 0x00, 0x04, 0x00,
+      0x00, 0x01, 0x00, 0x00, 0x02, 0x00, 0x00, 0x01, 0x00, 0x00, 0x04, 0x00,
   };
   mh2c::dynamic_table dynamic_table{};
 
@@ -804,11 +828,7 @@ TEST(frame_builder_test,
 
 TEST(frame_builder_test, goaway_frame_short_payload_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      7u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::GOAWAY),
-      0u,
-      0u,
-      0u,
+      7u, mh2c::underlying_cast(mh2c::frame_type_registry::GOAWAY), 0u, 0u, 0u,
   };
   const mh2c::byte_array_t raw_payload{0x80, 0x00, 0x00, 0x01,
                                        0x00, 0x00, 0x00};
@@ -824,10 +844,7 @@ TEST(frame_builder_test, goaway_frame_short_payload_falls_back_to_raw_frame) {
 
 TEST(frame_builder_test, priority_frame_short_payload_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      4u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::PRIORITY),
-      0u,
-      0u,
+      4u, mh2c::underlying_cast(mh2c::frame_type_registry::PRIORITY), 0u, 0u,
       1u,
   };
   const mh2c::byte_array_t raw_payload{0x80, 0x00, 0x00, 0x03};
@@ -841,17 +858,12 @@ TEST(frame_builder_test, priority_frame_short_payload_falls_back_to_raw_frame) {
   EXPECT_EQ(raw_payload, raw->get_payload());
 }
 
-TEST(frame_builder_test,
-     priority_frame_trailing_bytes_fall_back_to_raw_frame) {
+TEST(frame_builder_test, priority_frame_trailing_bytes_fall_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      6u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::PRIORITY),
-      0u,
-      0u,
+      6u, mh2c::underlying_cast(mh2c::frame_type_registry::PRIORITY), 0u, 0u,
       1u,
   };
-  const mh2c::byte_array_t raw_payload{0x80, 0x00, 0x00,
-                                       0x03, 0x10, 0xff};
+  const mh2c::byte_array_t raw_payload{0x80, 0x00, 0x00, 0x03, 0x10, 0xff};
   mh2c::dynamic_table dynamic_table{};
 
   const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
@@ -893,13 +905,10 @@ TEST(frame_builder_test, window_update_with_reserved) {
             *dynamic_cast<mh2c::window_update_frame*>(frame.get()));
 }
 
-TEST(frame_builder_test,
-     window_update_short_payload_falls_back_to_raw_frame) {
+TEST(frame_builder_test, window_update_short_payload_falls_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      3u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::WINDOW_UPDATE),
-      0u,
-      0u,
+      3u, mh2c::underlying_cast(mh2c::frame_type_registry::WINDOW_UPDATE),
+      0u, 0u,
       0u,
   };
   const mh2c::byte_array_t raw_payload{0x7f, 0xff, 0xff};
@@ -913,13 +922,10 @@ TEST(frame_builder_test,
   EXPECT_EQ(raw_payload, raw->get_payload());
 }
 
-TEST(frame_builder_test,
-     window_update_trailing_bytes_fall_back_to_raw_frame) {
+TEST(frame_builder_test, window_update_trailing_bytes_fall_back_to_raw_frame) {
   const mh2c::frame_header fh{
-      5u,
-      mh2c::underlying_cast(mh2c::frame_type_registry::WINDOW_UPDATE),
-      0u,
-      0u,
+      5u, mh2c::underlying_cast(mh2c::frame_type_registry::WINDOW_UPDATE),
+      0u, 0u,
       0u,
   };
   const mh2c::byte_array_t raw_payload{0x7f, 0xff, 0xff, 0xff, 0xaa};
@@ -935,11 +941,7 @@ TEST(frame_builder_test,
 
 TEST(frame_builder_test, unknown_frame_type_throws) {
   const mh2c::frame_header fh{
-      0u,
-      0xffu,
-      0u,
-      0u,
-      0u,
+      0u, 0xffu, 0u, 0u, 0u,
   };
   mh2c::dynamic_table dynamic_table{};
 

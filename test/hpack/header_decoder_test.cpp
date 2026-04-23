@@ -173,9 +173,8 @@ TEST(header_decoder, throw_if_literal_header_value_is_truncated) {
   const mh2c::header_block_entry header_entry{
       mh2c::header_prefix_pattern::WITHOUT_INDEXING, {"hoge", "fuga"}};
   const mh2c::dynamic_table dynamic_table{};
-  auto encoded_header =
-      mh2c::encode_header(header_entry, mh2c::header_encode_mode::NONE,
-                          dynamic_table);
+  auto encoded_header = mh2c::encode_header(
+      header_entry, mh2c::header_encode_mode::NONE, dynamic_table);
   encoded_header.pop_back();
 
   EXPECT_THROW(mh2c::decode_header(encoded_header, dynamic_table),
@@ -186,9 +185,8 @@ TEST(header_decoder, throw_if_huffman_encoded_value_is_truncated) {
   const mh2c::header_block_entry header_entry{
       mh2c::header_prefix_pattern::NEVER_INDEXED, {"hoge", "fuga"}};
   const mh2c::dynamic_table dynamic_table{};
-  auto encoded_header =
-      mh2c::encode_header(header_entry, mh2c::header_encode_mode::HUFFMAN,
-                          dynamic_table);
+  auto encoded_header = mh2c::encode_header(
+      header_entry, mh2c::header_encode_mode::HUFFMAN, dynamic_table);
   encoded_header.pop_back();
 
   EXPECT_THROW(mh2c::decode_header(encoded_header, dynamic_table),

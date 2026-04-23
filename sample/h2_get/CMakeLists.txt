@@ -3,6 +3,7 @@ add_executable(sample_h2_get "")
 
 target_sources(sample_h2_get
   PRIVATE
+    ../common/sample_common.cpp
     sample_h2_get.cpp
 )
 

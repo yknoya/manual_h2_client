@@ -62,8 +62,7 @@ void validate_window_size(const window_size_t window_size) {
 
 window_update_frame::window_update_frame(
     const fh_stream_id_t stream_id, const window_size_t window_size_increment)
-    : window_update_frame{
-stream_id, 0u, window_size_increment} {}
+    : window_update_frame{stream_id, 0u, window_size_increment} {}
 
 window_update_frame::window_update_frame(
     const fh_stream_id_t stream_id, const reserved_t reserved,

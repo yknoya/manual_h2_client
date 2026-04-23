@@ -16,9 +16,9 @@ TEST(header_type_test, default_constructor_uses_never_indexed_prefix) {
 }
 
 TEST(header_type_test, make_header_block_corrects_exact_static_table_match) {
-  const auto header_block = mh2c::make_header_block(
-      mh2c::header_prefix_pattern::WITHOUT_INDEXING,
-      mh2c::header_t{":method", "GET"});
+  const auto header_block =
+      mh2c::make_header_block(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+                              mh2c::header_t{":method", "GET"});
 
   ASSERT_EQ(1u, header_block.size());
   EXPECT_EQ(mh2c::header_prefix_pattern::INDEXED,
@@ -29,8 +29,7 @@ TEST(header_type_test, make_header_block_corrects_exact_static_table_match) {
 
 TEST(header_type_test, make_header_block_keeps_prefix_for_empty_static_value) {
   const auto header_block = mh2c::make_header_block(
-      mh2c::header_prefix_pattern::WITHOUT_INDEXING,
-      mh2c::header_t{"age", ""});
+      mh2c::header_prefix_pattern::WITHOUT_INDEXING, mh2c::header_t{"age", ""});
 
   ASSERT_EQ(1u, header_block.size());
   EXPECT_EQ(mh2c::header_prefix_pattern::WITHOUT_INDEXING,
@@ -39,9 +38,9 @@ TEST(header_type_test, make_header_block_keeps_prefix_for_empty_static_value) {
 }
 
 TEST(header_type_test, make_header_block_keeps_prefix_for_non_static_header) {
-  const auto header_block = mh2c::make_header_block(
-      mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
-      mh2c::header_t{"x-test-header", "x-test-value"});
+  const auto header_block =
+      mh2c::make_header_block(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
+                              mh2c::header_t{"x-test-header", "x-test-value"});
 
   ASSERT_EQ(1u, header_block.size());
   EXPECT_EQ(mh2c::header_prefix_pattern::INCREMENTAL_INDEXING,
@@ -65,8 +64,8 @@ TEST(header_type_test, get_max_size_throws_when_entry_holds_header) {
 }
 
 TEST(header_type_test, set_header_updates_variant_contents) {
-  mh2c::header_block_entry entry{
-      mh2c::header_prefix_pattern::WITHOUT_INDEXING, {"name", "before"}};
+  mh2c::header_block_entry entry{mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+                                 {"name", "before"}};
 
   entry.set_header({"name", "after"});
 

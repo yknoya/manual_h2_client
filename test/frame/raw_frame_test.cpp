@@ -13,20 +13,12 @@
 
 TEST(raw_frame_test, serialize_concatenates_header_and_payload) {
   const mh2c::frame_header header{
-      3u,
-      0x0f,
-      0x01,
-      0u,
-      1u,
+      3u, 0x0f, 0x01, 0u, 1u,
   };
   const mh2c::byte_array_t payload{0x01, 0x23, 0xab};
   const mh2c::raw_frame frame{header, payload};
   const mh2c::byte_array_t expected{
-      0x00, 0x00, 0x03,
-      0x0f,
-      0x01,
-      0x00, 0x00, 0x00, 0x01,
-      0x01, 0x23, 0xab,
+      0x00, 0x00, 0x03, 0x0f, 0x01, 0x00, 0x00, 0x00, 0x01, 0x01, 0x23, 0xab,
   };
 
   EXPECT_EQ(header, frame.get_header());
@@ -36,11 +28,7 @@ TEST(raw_frame_test, serialize_concatenates_header_and_payload) {
 
 TEST(raw_frame_test, dump_prints_generic_frame_and_hex_payload) {
   const mh2c::frame_header header{
-      3u,
-      0x0f,
-      0x01,
-      0u,
-      1u,
+      3u, 0x0f, 0x01, 0u, 1u,
   };
   const mh2c::raw_frame frame{header, {0x01, 0x23, 0xab}};
 
@@ -56,11 +44,7 @@ TEST(raw_frame_test, dump_prints_generic_frame_and_hex_payload) {
 
 TEST(raw_frame_test, output_operator_matches_dump_output) {
   const mh2c::frame_header header{
-      2u,
-      0x0f,
-      0x00,
-      0u,
-      3u,
+      2u, 0x0f, 0x00, 0u, 3u,
   };
   const mh2c::raw_frame frame{header, {0xde, 0xad}};
 
