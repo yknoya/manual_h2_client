@@ -60,14 +60,27 @@ void data_frame::dump(std::ostream& out_stream) const {
   out_stream << "[PAYLOAD]\n";
 
   const auto is_padded = is_flag_set(m_header.m_flags, df_flag::PADDED);
-  const pad_length_t pad_length = is_padded ? m_payload[0] : 0u;
-  const auto data_ptr =
-      is_padded ? &m_payload[sizeof(pad_length_t)] : &m_payload[0];
-  const auto data_length =
-      is_padded ? m_header.m_length - pad_length - sizeof(pad_length_t)
-                : m_header.m_length;
-  const std::string_view data(reinterpret_cast<const char*>(data_ptr),
-                              data_length);
+  const auto payload_size = m_payload.size();
+  const pad_length_t pad_length =
+      (is_padded && !m_payload.empty()) ? m_payload[0] : 0u;
+  const auto header_bytes =
+      (is_padded && payload_size > 0u) ? sizeof(pad_length_t) : 0u;
+  const auto available_data_bytes =
+      (payload_size >= header_bytes + pad_length)
+          ? payload_size - header_bytes - pad_length
+          : 0u;
+  const auto data_begin =
+      m_payload.begin() + static_cast<byte_array_t::difference_type>(
+                              header_bytes);
+  const auto data_end =
+      data_begin +
+      static_cast<byte_array_t::difference_type>(available_data_bytes);
+  const std::string_view data =
+      available_data_bytes > 0u
+          ? std::string_view{
+                reinterpret_cast<const char*>(m_payload.data() + header_bytes),
+                available_data_bytes}
+          : std::string_view{};
 
   out_stream << "  Pad Length: " << std::to_string(pad_length) << '\n';
   out_stream << "  Data      : \n";
@@ -83,7 +96,9 @@ void data_frame::dump(std::ostream& out_stream) const {
 
   uint32_t counter{0};
   const auto pad_begin =
-      is_padded ? m_payload.end() - pad_length : m_payload.end();
+      (is_padded && payload_size >= header_bytes + pad_length)
+          ? data_end
+          : m_payload.end();
   std::for_each(pad_begin, m_payload.end(),
                 [&out_stream, &counter](const auto& elem) {
                   out_stream << std::hex << std::setw(2) << std::setfill('0')

@@ -3,6 +3,8 @@
 // See accompanying file LICENSE
 #include "mh2c/frame/data_frame.h"
 
+#include <sstream>
+
 #include <gtest/gtest.h>
 
 #include "mh2c/common/byte_array.h"
@@ -40,4 +42,20 @@ TEST(data_frame_test, serialize_with_padding) {
 
   const auto serialized_df = df.serialize();
   EXPECT_EQ(expected_raw_df, serialized_df);
+}
+
+TEST(data_frame_test, dump_empty_payload_does_not_throw) {
+  const mh2c::data_frame df{0x00, 0x01, mh2c::byte_array_t{}};
+  std::ostringstream oss;
+
+  EXPECT_NO_THROW(df.dump(oss));
+}
+
+TEST(data_frame_test, dump_padded_payload_without_data_does_not_throw) {
+  const mh2c::data_frame df{
+      mh2c::make_frame_header_flags(mh2c::df_flag::PADDED), 0x01,
+      mh2c::byte_array_t{0x02, 0xff, 0xff}};
+  std::ostringstream oss;
+
+  EXPECT_NO_THROW(df.dump(oss));
 }

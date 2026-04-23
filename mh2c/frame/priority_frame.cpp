@@ -31,7 +31,7 @@ frame_header construct_frame_header(const fh_stream_id_t stream_id) {
 
 priority_payload construct_payload(const byte_array_t& raw_payload) {
   const auto payload_size = raw_payload.size();
-  if (payload_size < PRIORITY_PAYLOAD_SIZE) {
+  if (payload_size != PRIORITY_PAYLOAD_SIZE) {
     const auto msg = "invalid payload size: " + std::to_string(payload_size);
     throw std::invalid_argument(msg);
   }

@@ -68,7 +68,13 @@ h2_frame_ptr build_headers_frame(const frame_header& fh,
 h2_frame_ptr build_goaway_frame(const frame_header& fh,
                                 const byte_array_t& raw_payload,
                                 const dynamic_table&) {
-  return std::make_unique<goaway_frame>(fh, raw_payload);
+  try {
+    return std::make_unique<goaway_frame>(fh, raw_payload);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return build_raw_frame(fh, raw_payload, dynamic_table{});
 }
 
 h2_frame_ptr build_ping_frame(const frame_header& fh,
@@ -80,7 +86,13 @@ h2_frame_ptr build_ping_frame(const frame_header& fh,
 h2_frame_ptr build_priority_frame(const frame_header& fh,
                                   const byte_array_t& raw_payload,
                                   const dynamic_table&) {
-  return std::make_unique<priority_frame>(fh, raw_payload);
+  try {
+    return std::make_unique<priority_frame>(fh, raw_payload);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return build_raw_frame(fh, raw_payload, dynamic_table{});
 }
 
 h2_frame_ptr build_push_promise_frame(const frame_header& fh,
@@ -140,7 +152,13 @@ h2_frame_ptr build_settings_frame(const frame_header& fh,
 h2_frame_ptr build_window_update_frame(const frame_header& fh,
                                        const byte_array_t& raw_payload,
                                        const dynamic_table&) {
-  return std::make_unique<window_update_frame>(fh, raw_payload);
+  try {
+    return std::make_unique<window_update_frame>(fh, raw_payload);
+  } catch (std::exception& e) {
+    std::cout << e.what() << '\n';
+  }
+
+  return build_raw_frame(fh, raw_payload, dynamic_table{});
 }
 
 using builder_func_t = h2_frame_ptr (*)(const frame_header&,
