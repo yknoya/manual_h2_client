@@ -153,6 +153,32 @@ TEST(frame_builder_test,
   EXPECT_EQ(raw_payload, raw->get_payload());
 }
 
+TEST(frame_builder_test,
+     continuation_frame_truncated_second_header_falls_back_to_raw_frame) {
+  const mh2c::fh_flags_t flags{
+      mh2c::make_frame_header_flags(mh2c::cf_flag::END_HEADERS)};
+  const mh2c::fh_stream_id_t stream_id{1u};
+  const mh2c::header_block_t header_block{mh2c::make_header_block(
+      mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+      mh2c::headers_t{{"x-first", "alpha"}, {"x-second", "beta"}})};
+  const mh2c::continuation_frame expected_cf{flags, stream_id, header_block,
+                                             mh2c::header_encode_mode::NONE,
+                                             mh2c::dynamic_table{}};
+
+  auto fh = expected_cf.get_header();
+  auto raw_payload = extract_payload(expected_cf);
+  raw_payload.pop_back();
+  fh.m_length = mh2c::cast_to_fh_length(raw_payload.size());
+
+  mh2c::dynamic_table dynamic_table{};
+  const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
+
+  const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
+  ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(fh, raw->get_header());
+  EXPECT_EQ(raw_payload, raw->get_payload());
+}
+
 // Build DATA FRAME
 TEST(frame_builder_test, data_frame_no_flags) {
   const mh2c::fh_flags_t flags{0u};
@@ -436,6 +462,32 @@ TEST(frame_builder_test,
   EXPECT_EQ(raw_payload, raw->get_payload());
 }
 
+TEST(frame_builder_test,
+     headers_frame_truncated_second_header_falls_back_to_raw_frame) {
+  const mh2c::fh_flags_t flags{
+      mh2c::make_frame_header_flags(mh2c::hf_flag::END_HEADERS)};
+  const mh2c::fh_stream_id_t stream_id{1u};
+  const mh2c::header_block_t header_block{mh2c::make_header_block(
+      mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+      mh2c::headers_t{{":method", "GET"}, {"x-second", "beta"}})};
+  const mh2c::headers_frame expected_hf{flags, stream_id, header_block,
+                                        mh2c::header_encode_mode::NONE,
+                                        mh2c::dynamic_table{}};
+
+  auto fh = expected_hf.get_header();
+  auto raw_payload = extract_payload(expected_hf);
+  raw_payload.pop_back();
+  fh.m_length = mh2c::cast_to_fh_length(raw_payload.size());
+
+  mh2c::dynamic_table dynamic_table{};
+  const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
+
+  const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
+  ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(fh, raw->get_header());
+  EXPECT_EQ(raw_payload, raw->get_payload());
+}
+
 TEST(frame_builder_test, headers_frame_with_priority) {
   const mh2c::fh_flags_t flags{
       mh2c::make_frame_header_flags(mh2c::hf_flag::PRIORITY)};
@@ -716,6 +768,37 @@ TEST(frame_builder_test,
 
   const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
   ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(raw_payload, raw->get_payload());
+}
+
+TEST(frame_builder_test,
+     push_promise_frame_truncated_second_header_falls_back_to_raw_frame) {
+  const mh2c::fh_flags_t flags{
+      mh2c::make_frame_header_flags(mh2c::ppf_flag::END_HEADERS)};
+  const mh2c::fh_stream_id_t stream_id{1u};
+  const mh2c::push_promise_payload payload{
+      0u,
+      3u,
+      mh2c::make_header_block(
+          mh2c::header_prefix_pattern::WITHOUT_INDEXING,
+          mh2c::headers_t{{":path", "/"}, {"x-second", "beta"}}),
+      {},
+  };
+  const mh2c::push_promise_frame expected_ppf{flags, stream_id, payload,
+                                              mh2c::header_encode_mode::NONE,
+                                              mh2c::dynamic_table{}};
+
+  auto fh = expected_ppf.get_header();
+  auto raw_payload = extract_payload(expected_ppf);
+  raw_payload.pop_back();
+  fh.m_length = mh2c::cast_to_fh_length(raw_payload.size());
+
+  mh2c::dynamic_table dynamic_table{};
+  const auto frame = mh2c::build_frame(fh, raw_payload, dynamic_table);
+
+  const auto* raw = dynamic_cast<mh2c::raw_frame*>(frame.get());
+  ASSERT_NE(nullptr, raw);
+  EXPECT_EQ(fh, raw->get_header());
   EXPECT_EQ(raw_payload, raw->get_payload());
 }
 

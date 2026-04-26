@@ -78,3 +78,34 @@ Shared sample options:
 * `--path PATH`: request path for request/response samples
 * `--insecure`: disable TLS certificate verification for manual debugging
 * `--help`: print usage
+
+### Sample smoke check
+For a quick end-to-end sample validation, build `sample_h2_get` and run the
+smoke-check helper:
+
+```
+$ cmake -B build \
+  -DBUILD_SHARED_LIBS=ON \
+  -DMH2C_BUILD_SAMPLE=ON
+$ cmake --build build --target sample_h2_get
+$ ./sample/h2_get/smoke_check.sh
+```
+
+The helper executes `sample_h2_get` directly and prints the exact command
+before running it. You can override the target endpoint without changing the
+sample itself:
+
+```
+$ MH2C_SMOKE_HOST=example.com \
+  MH2C_SMOKE_PATH=/ \
+  ./sample/h2_get/smoke_check.sh
+```
+
+Available environment variables:
+
+* `MH2C_SMOKE_HOST`
+* `MH2C_SMOKE_PORT`
+* `MH2C_SMOKE_PATH`
+* `MH2C_SMOKE_AUTHORITY`
+* `MH2C_SMOKE_INSECURE=1`
+* `MH2C_SAMPLE_H2_GET_BIN`
